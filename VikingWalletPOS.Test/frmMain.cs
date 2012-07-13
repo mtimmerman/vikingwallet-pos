@@ -96,12 +96,37 @@ namespace VikingWalletPOS.Test
 
         private void btnSend_Click(object sender, EventArgs e)
         {
-            using (MemoryStream stream = new MemoryStream())
+            using (MemoryStream buffer = new MemoryStream())
             {
-                EComMessage outgoingMessage = EComMessage.CreateMessageFromElement(ConvertXmlToWbxml(txtRequest.Text));
-                outgoingMessage.WriteToStream(stream);
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    XmlWriterSettings settings = new XmlWriterSettings();
+                    settings.OmitXmlDeclaration = true;
+                    settings.Encoding = UTF8Encoding.Default;
+                    
+                    XmlWriter writer = XmlWriter.Create(buffer, settings);                    
+                    writer.WriteStartElement("req");
+                    writer.WriteAttributeString("app", "??");
+                    writer.WriteAttributeString("id", "dealByPAN");
+                    writer.WriteAttributeString("ver", "1");
+                    writer.WriteAttributeString("dt", DateTime.Now.ToString("yyyyMMddHHmmtt"));
+                    writer.WriteAttributeString("tid", txtGetCouponTerminalId.Text);
+                    writer.WriteAttributeString("pan", txtGetCouponCardPAN.Text);
+                    writer.WriteAttributeString("mid", txtGetCouponMerchantId.Text);
+                    writer.WriteEndElement();
+                    writer.Close();
 
-                synchronizedMessenger.SendMessage(new ScsRawDataMessage(stream.ToArray()));
+                    buffer.Seek(0, SeekOrigin.Begin);
+                    string xml = Encoding.UTF8.GetString(buffer.ToArray());
+
+                    txtGetCouponRequest.Text = xml;
+                    
+                    RootElement element = ConvertXmlToWbxml(xml);
+                    EComMessage outgoingMessage = EComMessage.CreateMessageFromElement(element);
+                    outgoingMessage.WriteToStream(stream);
+
+                    synchronizedMessenger.SendMessage(new ScsRawDataMessage(stream.ToArray()));
+                }
             }
         }
 

@@ -11,6 +11,7 @@ using Comtech;
 using Comtech.Wbxml;
 using System.Xml;
 using System.Threading.Tasks;
+using VikingWalletPOS.Test.Model;
 
 namespace VikingWalletPOS.Test
 {
@@ -18,6 +19,7 @@ namespace VikingWalletPOS.Test
     {
         private IScsServer server;
         private bool started;
+        private API api;
         
         public Server()
         {
@@ -25,6 +27,21 @@ namespace VikingWalletPOS.Test
             
             server.ClientConnected += new EventHandler<ServerClientEventArgs>(server_ClientConnected);
             server.ClientDisconnected += new EventHandler<ServerClientEventArgs>(server_ClientDisconnected);
+            api = new API();
+            api.CouponListReceived += new ResponseArgs(api_CouponListReceived);
+        }
+
+        void api_CouponListReceived(object sender, string response, IScsServerClient client)
+        {
+            string outGoingXml = "<rsp code='0' dsp='Test passed' prt='Test passed' />";
+            EComMessage outGoingMessage = EComMessage.CreateMessageFromElement(Server.ConvertXmlToWbxml(outGoingXml));
+
+            using (MemoryStream writeStream = new MemoryStream())
+            {
+                outGoingMessage.WriteToStream(writeStream);
+
+                client.SendMessage(new ScsRawDataMessage(writeStream.ToArray()));
+            }
         }
 
         public void Start()
@@ -63,10 +80,11 @@ namespace VikingWalletPOS.Test
         void server_ClientConnected(object sender, ServerClientEventArgs e)
         {
             Console.WriteLine(string.Format("A new client connected. Client Id = {0}", e.Client.ClientId));
-            e.Client.MessageReceived += messageReceivedHandler;
+            e.Client.MessageReceived += new EventHandler<MessageEventArgs>(Client_MessageReceived);
             e.Client.MessageSent += messageSentHandler;
         }
-        EventHandler<MessageEventArgs> messageReceivedHandler = delegate(object sender, MessageEventArgs e)
+
+        void Client_MessageReceived(object sender, MessageEventArgs e)
         {
             ScsRawDataMessage message = e.Message as ScsRawDataMessage;
             if (message == null)
@@ -85,19 +103,20 @@ namespace VikingWalletPOS.Test
                     message.RepliedMessageId));
                 Console.WriteLine(inComingXml);
 
-                Task task = Task.Factory.StartNew(() => {
-                    string outGoingXml = "<rsp code='0' dsp='Test passed' prt='Test passed' />";
-                    EComMessage outGoingMessage = EComMessage.CreateMessageFromElement(Server.ConvertXmlToWbxml(outGoingXml));
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(inComingXml);
 
-                    using (MemoryStream writeStream = new MemoryStream())
-                    {
-                        outGoingMessage.WriteToStream(writeStream);
+                if (doc.DocumentElement.GetAttribute("id") == "dealByPAN")
+                {
+                    int merchant_id = Convert.ToInt32(doc.DocumentElement.GetAttribute("mid"));
+                    string card_pan = doc.DocumentElement.GetAttribute("pan");
+                    string terminal_id = doc.DocumentElement.GetAttribute("tid");
 
-                        client.SendMessage(new ScsRawDataMessage(writeStream.ToArray(), e.Message.MessageId));
-                    }
-                });                
+                    GetPOSCouponRequest request = new GetPOSCouponRequest(merchant_id, card_pan, terminal_id);
+                    api.GetCoupon(request, client);
+                }                
             }            
-        };
+        }
         EventHandler<MessageEventArgs> messageSentHandler = delegate(object sender, MessageEventArgs e)
         {            
             ScsTextMessage message = e.Message as ScsTextMessage;
