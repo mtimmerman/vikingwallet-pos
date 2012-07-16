@@ -5,8 +5,7 @@ using System.Text;
 
 namespace VikingWalletPOS.Test.Model
 {
-    public class GetPOSCouponResult
+    public class Response
     {
-        
     }
 }

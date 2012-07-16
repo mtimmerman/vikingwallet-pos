@@ -24,9 +24,10 @@ namespace Comtech
 		//}
 
 		public ResponseMessage(Element element)
-			: base(Tag.Rsp, WbxmlWriter.ElementFlags.HasAttributes)
+			: base(Tag.Rsp, WbxmlWriter.ElementFlags.HasAttributes | WbxmlWriter.ElementFlags.HasChildren)
 		{
 			ConstructFromElement(element);
 		}
 	}
 }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    

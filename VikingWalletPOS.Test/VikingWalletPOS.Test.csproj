@@ -73,19 +73,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API.cs" />
+    <Compile Include="Client.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="frmMain.Designer.cs">
       <DependentUpon>frmMain.cs</DependentUpon>
     </Compile>
-    <Compile Include="Model\GetPOSCouponRequest.cs" />
-    <Compile Include="Model\GetPOSCouponResult.cs" />
+    <Compile Include="Model\GetPOSCoupon.cs" />
+    <Compile Include="Model\Message.cs" />
     <Compile Include="Model\Meta.cs" />
     <Compile Include="Model\RequestObject.cs" />
+    <Compile Include="Model\Response.cs" />
+    <Compile Include="Model\ResultObject.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Server.cs" />
+    <Compile Include="Utils.cs" />
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
     </EmbeddedResource>

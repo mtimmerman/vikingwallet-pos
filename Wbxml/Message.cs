@@ -76,9 +76,10 @@ namespace Comtech
 
 		protected abstract void WriteAttributes(WbxmlWriter w);
 
-		protected virtual void WriteChildElements(WbxmlWriter w)
-		{
-		}
+        protected void WriteChildElements(WbxmlWriter w)
+        {
+
+        }
 		#endregion
 
 		#region Incoming messages / reading

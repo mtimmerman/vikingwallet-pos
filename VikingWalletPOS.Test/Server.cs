@@ -17,74 +17,178 @@ namespace VikingWalletPOS.Test
 {
     public class Server
     {
+        #region Private Members
         private IScsServer server;
         private bool started;
         private API api;
-        
+        #endregion
+
+        #region Constructor
         public Server()
         {
             server = ScsServerFactory.CreateServer(new ScsTcpEndPoint(10085));
-            
-            server.ClientConnected += new EventHandler<ServerClientEventArgs>(server_ClientConnected);
-            server.ClientDisconnected += new EventHandler<ServerClientEventArgs>(server_ClientDisconnected);
+            server.ClientConnected += new EventHandler<ServerClientEventArgs>(ClientConnected);
+            server.ClientDisconnected += new EventHandler<ServerClientEventArgs>(ClientDisconnected);
             api = new API();
-            api.CouponListReceived += new ResponseArgs(api_CouponListReceived);
+            api.CouponListReceived += new ResponseArgs(CouponListReceived);
         }
+        #endregion
 
-        void api_CouponListReceived(object sender, string response, IScsServerClient client)
+        public event ServerMessageDelegate MessageLogged;
+
+        void LogMessage(string msg)
         {
-            string outGoingXml = "<rsp code='0' dsp='Test passed' prt='Test passed' />";
-            EComMessage outGoingMessage = EComMessage.CreateMessageFromElement(Server.ConvertXmlToWbxml(outGoingXml));
-
-            using (MemoryStream writeStream = new MemoryStream())
+            if (MessageLogged != null)
             {
-                outGoingMessage.WriteToStream(writeStream);
-
-                client.SendMessage(new ScsRawDataMessage(writeStream.ToArray()));
+                MessageLogged(msg);
             }
         }
 
+        #region API Responses
+        /// <summary>
+        /// The list of coupons has been received
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="data">The result from the Viking Spots API</param>
+        /// <param name="client">The TCP server client that made the request</param>
+        void CouponListReceived(object sender, ResultObject data, IScsServerClient client, ScsMessage message)
+        {
+            LogMessage("Data successfully received from Viking Spots");
+
+            GetPOSCouponResult result = data as GetPOSCouponResult;
+
+            using (MemoryStream buffer = new MemoryStream())
+            {
+                // Construct the expected WBXML format from the response
+
+                XmlWriterSettings settings = new XmlWriterSettings();
+                settings.OmitXmlDeclaration = true;
+                settings.Encoding = Encoding.GetEncoding("iso-8859-1");
+
+                /*
+                 * Example:
+                 * 
+                 * <rsp code="0" seq="" dsp="" prt="">
+                 *  <lst id="deals">
+                 *      <row>
+                 *          <fld id="dealId" val="" />
+                 *          <fld id="name" val="" />
+                 *          <fld id="user" val="" />
+                 *      </row>
+                 *  </lst>
+                 *</rsp>
+                 */
+
+                XmlWriter writer = XmlWriter.Create(buffer, settings);
+                writer.WriteStartElement("rsp");
+                writer.WriteAttributeString("code", "0");
+                writer.WriteAttributeString("seq", "");
+                writer.WriteAttributeString("dsp", "Coupon list has been retrieved");
+                writer.WriteAttributeString("prt", "Please choose the correct one");
+                writer.WriteStartElement("lst");
+
+                writer.WriteAttributeString("id", "deals");
+
+                foreach (POSCoupon coupon in result.response.coupons)
+                {
+                    writer.WriteStartElement("row");
+
+                    writer.WriteStartElement("fld");
+                    writer.WriteAttributeString("id", "dealId");
+                    writer.WriteAttributeString("val", coupon.id.ToString());
+                    writer.WriteEndElement(); // fld end element
+
+                    writer.WriteStartElement("fld");
+                    writer.WriteAttributeString("id", "name");
+                    writer.WriteAttributeString("val", coupon.name);
+                    writer.WriteEndElement(); // fld end element
+
+                    writer.WriteStartElement("fld");
+                    writer.WriteAttributeString("id", "user");
+                    writer.WriteAttributeString("val", coupon.user);
+                    writer.WriteEndElement(); // fld end element
+
+                    writer.WriteEndElement(); // row end element
+                }
+                writer.WriteEndElement(); // lst end element
+                writer.WriteEndElement(); // rsp end element
+                writer.Close();
+
+                // Get the XML to convert to WBXML
+                buffer.Seek(0, SeekOrigin.Begin);
+                string outGoingXml = Encoding.GetEncoding("iso-8859-1").GetString(buffer.ToArray());
+
+                LogMessage(string.Format("Encoding to WBXML:\r\n{0}", outGoingXml));
+
+                // Convert
+                RootElement element = Utils.ConvertXmlToWbxml(outGoingXml);                
+                EComMessage outGoingMessage = EComMessage.CreateMessageFromElement(element);
+
+                MemoryStream writeStream = new MemoryStream();
+                outGoingMessage.WriteToStream(writeStream);
+                
+                // Sender message to the client
+                client.SendMessage(new ScsRawDataMessage(writeStream.ToArray(), message.MessageId));
+            }
+        }
+        #endregion
+
+        #region Public Methods
+        /// <summary>
+        /// Start the server
+        /// </summary>
         public void Start()
         {
             if (!started)
             {
                 server.Start();
                 started = true;
-                Console.WriteLine("Server is started successfully.");
+                LogMessage("Server is started successfully.");
             }
             else
             {
-                Console.WriteLine("Server is already running!");
+                LogMessage("Server is already running!");
             }
         }
-
+        /// <summary>
+        /// Stop the server
+        /// </summary>
         public void Stop()
         {
             if (started)
             {
                 server.Stop();
                 started = false;
-                Console.WriteLine("Server is stopped successfully.");
+                LogMessage("Server is stopped successfully.");
             }
             else
             {
-                Console.WriteLine("Server wasn't running!");
+                LogMessage("Server wasn't running!");
             }
         }
+        #endregion
 
-        void server_ClientDisconnected(object sender, ServerClientEventArgs e)
+        #region Event Handlers
+        void ClientDisconnected(object sender, ServerClientEventArgs e)
         {
-            Console.WriteLine(string.Format("A client is disconnected. Client Id = {0}", e.Client.ClientId));
+            LogMessage(string.Format("A client is disconnected. Client Id = {0}", e.Client.ClientId));
         }
 
-        void server_ClientConnected(object sender, ServerClientEventArgs e)
+        void ClientConnected(object sender, ServerClientEventArgs e)
         {
-            Console.WriteLine(string.Format("A new client connected. Client Id = {0}", e.Client.ClientId));
-            e.Client.MessageReceived += new EventHandler<MessageEventArgs>(Client_MessageReceived);
-            e.Client.MessageSent += messageSentHandler;
-        }
+            LogMessage(string.Format("A new client connected. Client Id = {0}", e.Client.ClientId));
 
-        void Client_MessageReceived(object sender, MessageEventArgs e)
+            // Set up client message handling
+            e.Client.MessageReceived += new EventHandler<MessageEventArgs>(ClientMessageReceived);
+            e.Client.MessageSent += new EventHandler<MessageEventArgs>(ClientMessageSent);
+        }
+        /// <summary>
+        /// A message has been received from a client. 
+        /// Depending on the id of the message a different Viking Spots API will be called.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void ClientMessageReceived(object sender, MessageEventArgs e)
         {
             ScsRawDataMessage message = e.Message as ScsRawDataMessage;
             if (message == null)
@@ -95,45 +199,50 @@ namespace VikingWalletPOS.Test
             using (MemoryStream readStream = new MemoryStream(message.MessageData))
             {                
                 EComMessage incomingMessage = EComMessage.ReadFromStream(readStream);
-
+                // Decode WBXML to XML
                 string inComingXml = incomingMessage.RootElement.ToXmlString();
 
-                Console.WriteLine(string.Format("Received message {0} contents in reply to {1}:",
-                    message.MessageId,
-                    message.RepliedMessageId));
-                Console.WriteLine(inComingXml);
-
+                if (!string.IsNullOrEmpty(message.RepliedMessageId))
+                {
+                    LogMessage(string.Format("Received message {0} contents in reply to {1}:\r\n{2}",
+                        message.MessageId,
+                        message.RepliedMessageId,
+                        inComingXml));
+                }
+                else
+                {
+                    LogMessage(string.Format("Received message {0} contents:\r\n{1}",
+                        message.MessageId,
+                        inComingXml));
+                }
+                
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml(inComingXml);
 
                 if (doc.DocumentElement.GetAttribute("id") == "dealByPAN")
-                {
+                {                    
+                    // Call GetCoupon
                     int merchant_id = Convert.ToInt32(doc.DocumentElement.GetAttribute("mid"));
                     string card_pan = doc.DocumentElement.GetAttribute("pan");
                     string terminal_id = doc.DocumentElement.GetAttribute("tid");
 
                     GetPOSCouponRequest request = new GetPOSCouponRequest(merchant_id, card_pan, terminal_id);
-                    api.GetCoupon(request, client);
+                    LogMessage(string.Format("Contacting Viking Spots API for GetCoupon"));
+                    api.GetCoupon(request, client, message);
                 }                
             }            
         }
-        EventHandler<MessageEventArgs> messageSentHandler = delegate(object sender, MessageEventArgs e)
-        {            
-            ScsTextMessage message = e.Message as ScsTextMessage;
+        void ClientMessageSent(object sender, MessageEventArgs e)
+        {
+            ScsRawDataMessage message = e.Message as ScsRawDataMessage;
             if (message == null)
                 return;
-            Console.WriteLine(string.Format("Sent message {0} contents in reply to {1}:", 
-                message.MessageId,
-                message.RepliedMessageId));
-            Console.WriteLine(message.Text);
-        };
 
-        private static RootElement ConvertXmlToWbxml(string xml)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml(xml);
-            RootElement root = RootElement.ReadFromXml(doc.DocumentElement);
-            return root;
+            LogMessage(string.Format("Sent message {0} contents in reply to {1}:\r\n{2}",
+                message.MessageId,
+                message.RepliedMessageId,
+                BitConverter.ToString(message.MessageData)));            
         }
+        #endregion
     }
 }
