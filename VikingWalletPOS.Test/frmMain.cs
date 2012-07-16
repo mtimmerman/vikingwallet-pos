@@ -31,22 +31,26 @@ namespace VikingWalletPOS.Test
             server = new Server();
             client = new Client();
 
-            server.MessageLogged += new ServerMessageDelegate(ServerMessageLogged);
+            server.Logged += new EventHandler<StringEventArgs>(ServerMessageLogged);
 
-            client.MessageReceived += new ServerMessageDelegate(MessageReceived);
+            client.MessageReceived += new EventHandler<StringEventArgs>(MessageReceived);
             client.Connected += new EventHandler(ClientConnected);
             client.Disconnected += new EventHandler(ClientDisconnected);            
         }
 
-        void ServerMessageLogged(string response)
+        void ServerMessageLogged(object sender, StringEventArgs e) 
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new ServerMessageDelegate(ServerMessageLogged), response);
+                try
+                {
+                    this.Invoke(new EventHandler<StringEventArgs>(ServerMessageLogged), sender, e);
+                }
+                catch (ObjectDisposedException) { }
             }
             else
             {
-                txtResponse.AppendText(string.Format("\r\n{0}\r\n", response));
+                txtResponse.AppendText(string.Format("\r\n{0}\r\n", e.Message));
             }
         }
 
@@ -54,7 +58,11 @@ namespace VikingWalletPOS.Test
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new EventHandler(ClientDisconnected), sender, e);
+                try
+                {
+                    this.Invoke(new EventHandler(ClientDisconnected), sender, e);
+                }
+                catch (ObjectDisposedException) { }
             }
             else
             {
@@ -78,15 +86,15 @@ namespace VikingWalletPOS.Test
             }
         }
 
-        private void MessageReceived(string text)
+        private void MessageReceived(object sender, StringEventArgs e)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new ServerMessageDelegate(MessageReceived), text);
+                this.Invoke(new EventHandler<StringEventArgs>(MessageReceived), sender, e);
             }
             else
             {
-                txtResponse.AppendText(string.Format("\r\nResponse from server:\r\n{0}\r\n", text));                
+                txtResponse.AppendText(string.Format("\r\nResponse from server:\r\n{0}\r\n", e.Message));                
             }
         }
 
@@ -101,8 +109,8 @@ namespace VikingWalletPOS.Test
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-            server.Stop();
             client.Disconnect();
+            server.Stop();            
         }
 
         private void btnStopServer_Click(object sender, EventArgs e)
@@ -129,6 +137,13 @@ namespace VikingWalletPOS.Test
             }
         }
 
+        /// <summary>
+        /// Send sample request. Normally our third party would do this request.
+        /// 
+        /// For testing purposes ONLY!
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnSend_Click(object sender, EventArgs e)
         {
             using (MemoryStream buffer = new MemoryStream())
@@ -153,10 +168,8 @@ namespace VikingWalletPOS.Test
                 buffer.Seek(0, SeekOrigin.Begin);
                 string xml = Encoding.UTF8.GetString(buffer.ToArray());
 
-                txtGetCouponRequest.Text = xml;
-
                 client.SendMessage(xml);
-            }
+            }            
         }        
     }
 }

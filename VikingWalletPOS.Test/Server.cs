@@ -15,6 +15,16 @@ using VikingWalletPOS.Test.Model;
 
 namespace VikingWalletPOS.Test
 {
+    /// <summary>
+    /// This class sets up a TCP server that listens for incoming requests.
+    /// 
+    /// When it does, it will:
+    /// 
+    /// - Translate the incoming WBXML message to a readable format.
+    /// - Determine which Viking Spots API call needs to be done and execute it using the parameters in the XML
+    /// - Translate the response returned by the Viking Spots API back to WBXML
+    /// - Send the WBXML to the client
+    /// </summary>
     public class Server
     {
         #region Private Members
@@ -27,36 +37,35 @@ namespace VikingWalletPOS.Test
         public Server()
         {
             server = ScsServerFactory.CreateServer(new ScsTcpEndPoint(10085));
+
             server.ClientConnected += new EventHandler<ServerClientEventArgs>(ClientConnected);
             server.ClientDisconnected += new EventHandler<ServerClientEventArgs>(ClientDisconnected);
-            api = new API();
-            api.CouponListReceived += new ResponseArgs(CouponListReceived);
+            
+            api = new API();            
         }
+
         #endregion
 
-        public event ServerMessageDelegate MessageLogged;
-
-        void LogMessage(string msg)
+        #region Events
+        public event EventHandler<StringEventArgs> Logged;
+        void Log(string msg)
         {
-            if (MessageLogged != null)
+            if (Logged != null)
             {
-                MessageLogged(msg);
+                Logged(this, new StringEventArgs(msg));
             }
         }
+        #endregion
 
         #region API Responses
         /// <summary>
         /// The list of coupons has been received
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="data">The result from the Viking Spots API</param>
-        /// <param name="client">The TCP server client that made the request</param>
-        void CouponListReceived(object sender, ResultObject data, IScsServerClient client, ScsMessage message)
+        /// <param name="data">The result return by Viking Spots</param>
+        /// <param name="client">The client that made the request</param>
+        /// <param name="message">The message containing the request</param>
+        void CouponListReceived(GetPOSCouponResult data, IScsServerClient client, ScsMessage message)
         {
-            LogMessage("Data successfully received from Viking Spots");
-
-            GetPOSCouponResult result = data as GetPOSCouponResult;
-
             using (MemoryStream buffer = new MemoryStream())
             {
                 // Construct the expected WBXML format from the response
@@ -89,7 +98,7 @@ namespace VikingWalletPOS.Test
 
                 writer.WriteAttributeString("id", "deals");
 
-                foreach (POSCoupon coupon in result.response.coupons)
+                foreach (POSCoupon coupon in data.response.coupons)
                 {
                     writer.WriteStartElement("row");
 
@@ -117,18 +126,19 @@ namespace VikingWalletPOS.Test
                 // Get the XML to convert to WBXML
                 buffer.Seek(0, SeekOrigin.Begin);
                 string outGoingXml = Encoding.GetEncoding("iso-8859-1").GetString(buffer.ToArray());
-
-                LogMessage(string.Format("Encoding to WBXML:\r\n{0}", outGoingXml));
-
-                // Convert
+                
+                // Convert to WBXML
                 RootElement element = Utils.ConvertXmlToWbxml(outGoingXml);                
                 EComMessage outGoingMessage = EComMessage.CreateMessageFromElement(element);
 
-                MemoryStream writeStream = new MemoryStream();
-                outGoingMessage.WriteToStream(writeStream);
-                
-                // Sender message to the client
-                client.SendMessage(new ScsRawDataMessage(writeStream.ToArray(), message.MessageId));
+                // Write message to buffer
+                using (MemoryStream writeStream = new MemoryStream())
+                {
+                    outGoingMessage.WriteToStream(writeStream);
+
+                    // Sender message to the client
+                    client.SendMessage(new ScsRawDataMessage(writeStream.ToArray(), message.MessageId));
+                }
             }
         }
         #endregion
@@ -143,11 +153,11 @@ namespace VikingWalletPOS.Test
             {
                 server.Start();
                 started = true;
-                LogMessage("Server is started successfully.");
+                Log("Server is started successfully.");
             }
             else
             {
-                LogMessage("Server is already running!");
+                Log("Server is already running!");
             }
         }
         /// <summary>
@@ -159,11 +169,11 @@ namespace VikingWalletPOS.Test
             {
                 server.Stop();
                 started = false;
-                LogMessage("Server is stopped successfully.");
+                Log("Server is stopped successfully.");
             }
             else
             {
-                LogMessage("Server wasn't running!");
+                Log("Server wasn't running!");
             }
         }
         #endregion
@@ -171,12 +181,12 @@ namespace VikingWalletPOS.Test
         #region Event Handlers
         void ClientDisconnected(object sender, ServerClientEventArgs e)
         {
-            LogMessage(string.Format("A client is disconnected. Client Id = {0}", e.Client.ClientId));
+            Log(string.Format("A client is disconnected. Client Id = {0}", e.Client.ClientId));
         }
 
         void ClientConnected(object sender, ServerClientEventArgs e)
         {
-            LogMessage(string.Format("A new client connected. Client Id = {0}", e.Client.ClientId));
+            Log(string.Format("A new client connected. Client Id = {0}", e.Client.ClientId));
 
             // Set up client message handling
             e.Client.MessageReceived += new EventHandler<MessageEventArgs>(ClientMessageReceived);
@@ -202,19 +212,10 @@ namespace VikingWalletPOS.Test
                 // Decode WBXML to XML
                 string inComingXml = incomingMessage.RootElement.ToXmlString();
 
-                if (!string.IsNullOrEmpty(message.RepliedMessageId))
-                {
-                    LogMessage(string.Format("Received message {0} contents in reply to {1}:\r\n{2}",
-                        message.MessageId,
-                        message.RepliedMessageId,
-                        inComingXml));
-                }
-                else
-                {
-                    LogMessage(string.Format("Received message {0} contents:\r\n{1}",
-                        message.MessageId,
-                        inComingXml));
-                }
+                Log(string.Format("Request from client {0} with id {1}:\r\n{2}",
+                    client.ClientId,
+                    message.MessageId,
+                    inComingXml));
                 
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml(inComingXml);
@@ -227,21 +228,24 @@ namespace VikingWalletPOS.Test
                     string terminal_id = doc.DocumentElement.GetAttribute("tid");
 
                     GetPOSCouponRequest request = new GetPOSCouponRequest(merchant_id, card_pan, terminal_id);
-                    LogMessage(string.Format("Contacting Viking Spots API for GetCoupon"));
-                    api.GetCoupon(request, client, message);
+                    //Log(string.Format("Contacting Viking Spots API for GetCoupon"));
+                    api.GetCouponAsync(request, (response) =>
+                    {
+                        CouponListReceived(response, client, message);
+                    });
                 }                
             }            
         }
         void ClientMessageSent(object sender, MessageEventArgs e)
         {
-            ScsRawDataMessage message = e.Message as ScsRawDataMessage;
-            if (message == null)
-                return;
+            //ScsRawDataMessage message = e.Message as ScsRawDataMessage;
+            //if (message == null)
+            //    return;
 
-            LogMessage(string.Format("Sent message {0} contents in reply to {1}:\r\n{2}",
-                message.MessageId,
-                message.RepliedMessageId,
-                BitConverter.ToString(message.MessageData)));            
+            //Log(string.Format("Sent message {0} contents in reply to {1}:\r\n{2}",
+            //    message.MessageId,
+            //    message.RepliedMessageId,
+            //    BitConverter.ToString(message.MessageData)));            
         }
         #endregion
     }

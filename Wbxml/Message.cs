@@ -34,7 +34,7 @@ namespace Comtech
 			this.flags = flags;
 		}
 
-		public void WriteToStream(Stream s)
+		public virtual void WriteToStream(Stream s)
 		{
 			// create the message body in a buffer
 			MemoryStream ms = new MemoryStream();

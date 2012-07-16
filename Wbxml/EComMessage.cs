@@ -4,6 +4,7 @@ using System.Text;
 using System.IO;
 using log4net;
 using Comtech.Wbxml;
+using Comtech.Utils;
 
 namespace Comtech
 {
@@ -61,6 +62,25 @@ namespace Comtech
 			msg.SetIncomingAuthData(authType, rawData, mac);
 			return msg;
 		}
+
+        public override void WriteToStream(Stream s)
+        {
+            // create the message body in a buffer
+            MemoryStream ms = new MemoryStream();
+            WbxmlWriter w = new WbxmlWriter(ms, AppConfig.TerminalEncoding);
+            w.WriteHeader();
+            w.WriteElement(tempRootElement);
+
+            byte[] buf = ms.ToArray();
+            int len = buf.Length;
+
+            log.Debug("sending message: length: " + len + "\r\n" + HexHelper.ToHexDump(buf));
+
+            // write message into the TCP/IP stream (length + body + MAC if needed)
+            BinaryWriter bw = new BinaryWriter(s);
+            bw.Write(BinaryHelper.SwapByteOrder(len));
+            bw.Write(buf);
+        }
 
 		public static EComMessage CreateMessageFromElement(RootElement element)
 		{

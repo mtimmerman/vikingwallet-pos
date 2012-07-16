@@ -7,39 +7,39 @@ using RestSharp;
 using Hik.Communication.Scs.Server;
 using Newtonsoft.Json;
 using Hik.Communication.Scs.Communication.Messages;
+using System.Threading.Tasks;
 
 namespace VikingWalletPOS.Test
 {
-    public delegate void ResponseArgs(object sender, ResultObject data, IScsServerClient client, ScsMessage message);
-
     public class API
     {
+        #region Private Members
         private RestClient apiClient;
-        private string authHeader = "";
+        #endregion        
 
-        public event ResponseArgs CouponListReceived;
-        private void OnCouponListReceived(GetPOSCouponResult data, IScsServerClient client, ScsMessage message)
-        {
-            if (CouponListReceived != null)
-            {
-                CouponListReceived(this, data, client, message);
-            }
-        }
+        #region Constructor
         public API()
         {
             apiClient = new RestClient("http://beta.vikingspots.com/en/api/3/");
             apiClient.Authenticator = new HttpBasicAuthenticator("mtimmerman", "ca960306de9828be5a43ac1c14ad86abf02a3d71");
         }
+        #endregion
 
-        public void GetCoupon(GetPOSCouponRequest req, IScsServerClient client, ScsMessage message)
+        #region Public Methods
+        /// <summary>
+        /// Get the coupon list
+        /// </summary>
+        /// <param name="req">Request parameters needed to do the request to Viking Spots</param>
+        /// <param name="callback">Delegate that handles the callback</param>
+        public void GetCouponAsync(GetPOSCouponRequest req, Action<GetPOSCouponResult> callback)
         {
             RestRequest request = new RestRequest(string.Format("poscoupon/?{0}", req.ToQueryString()), Method.GET);
             
             apiClient.GetAsync(request, (response, handle) =>
             {
-                GetPOSCouponResult data = JsonConvert.DeserializeObject<GetPOSCouponResult>(response.Content);
-                OnCouponListReceived(data, client, message);
+                callback(JsonConvert.DeserializeObject<GetPOSCouponResult>(response.Content));                
             });
         }
-    }
+        #endregion
+    }    
 }

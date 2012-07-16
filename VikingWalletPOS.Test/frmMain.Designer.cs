@@ -43,7 +43,6 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.txtGetCouponTerminalId = new System.Windows.Forms.TextBox();
-            this.txtGetCouponRequest = new System.Windows.Forms.TextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.panel1 = new System.Windows.Forms.Panel();
             this.txtResponse = new System.Windows.Forms.TextBox();
@@ -100,8 +99,8 @@
             // 
             // btnSendGetCoupon
             // 
-            this.btnSendGetCoupon.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnSendGetCoupon.Location = new System.Drawing.Point(119, 157);
+            this.btnSendGetCoupon.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSendGetCoupon.Location = new System.Drawing.Point(488, 160);
             this.btnSendGetCoupon.Name = "btnSendGetCoupon";
             this.btnSendGetCoupon.Size = new System.Drawing.Size(75, 23);
             this.btnSendGetCoupon.TabIndex = 6;
@@ -134,7 +133,6 @@
             // tabPage1
             // 
             this.tabPage1.Controls.Add(this.groupBox2);
-            this.tabPage1.Controls.Add(this.txtGetCouponRequest);
             this.tabPage1.Location = new System.Drawing.Point(4, 25);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
@@ -145,8 +143,6 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
             this.groupBox2.Controls.Add(this.txtGetCouponMerchantId);
             this.groupBox2.Controls.Add(this.btnSendGetCoupon);
             this.groupBox2.Controls.Add(this.label3);
@@ -154,9 +150,10 @@
             this.groupBox2.Controls.Add(this.label2);
             this.groupBox2.Controls.Add(this.label1);
             this.groupBox2.Controls.Add(this.txtGetCouponTerminalId);
-            this.groupBox2.Location = new System.Drawing.Point(6, 3);
+            this.groupBox2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox2.Location = new System.Drawing.Point(3, 3);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(200, 186);
+            this.groupBox2.Size = new System.Drawing.Size(569, 189);
             this.groupBox2.TabIndex = 0;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Parameters";
@@ -212,19 +209,6 @@
             this.txtGetCouponTerminalId.TabIndex = 0;
             this.txtGetCouponTerminalId.Text = "12345";
             // 
-            // txtGetCouponRequest
-            // 
-            this.txtGetCouponRequest.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtGetCouponRequest.Location = new System.Drawing.Point(212, 3);
-            this.txtGetCouponRequest.Multiline = true;
-            this.txtGetCouponRequest.Name = "txtGetCouponRequest";
-            this.txtGetCouponRequest.ReadOnly = true;
-            this.txtGetCouponRequest.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtGetCouponRequest.Size = new System.Drawing.Size(339, 189);
-            this.txtGetCouponRequest.TabIndex = 1;
-            // 
             // tabControl1
             // 
             this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -273,7 +257,6 @@
             this.groupBox1.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
-            this.tabPage1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.tabControl1.ResumeLayout(false);
@@ -301,7 +284,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox txtGetCouponTerminalId;
         private System.Windows.Forms.TabControl tabControl1;
-        private System.Windows.Forms.TextBox txtGetCouponRequest;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.TextBox txtResponse;
     }

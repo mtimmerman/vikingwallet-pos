@@ -12,13 +12,11 @@ using Comtech;
 
 namespace VikingWalletPOS.Test
 {
-    public delegate void ServerMessageDelegate(string response);
-
     public class Client
-    {
+    {        
         private IScsClient client;
-        private SynchronizedMessenger<IScsClient> synchronizedMessenger;
-        public event ServerMessageDelegate MessageReceived;
+        private RequestReplyMessenger<IScsClient> messenger;
+        public event EventHandler<StringEventArgs> MessageReceived;
         public event EventHandler Connected;
         public event EventHandler Disconnected;        
 
@@ -28,7 +26,7 @@ namespace VikingWalletPOS.Test
             client.MessageReceived += new EventHandler<MessageEventArgs>(ServerMessageReceived);
             client.Connected += new EventHandler(ClientConnected);
             client.Disconnected += new EventHandler(ClientDisconnected);
-            synchronizedMessenger = new SynchronizedMessenger<IScsClient>(client);
+            messenger = new RequestReplyMessenger<IScsClient>(client);
         }
 
         void ServerMessageReceived(object sender, MessageEventArgs e)
@@ -42,7 +40,7 @@ namespace VikingWalletPOS.Test
                 string text = Encoding.GetEncoding("iso-8859-1").GetString(message.MessageData);
 
                 if (MessageReceived != null)
-                    MessageReceived(Utils.ConvertWbxmlToXml(readStream).ToString());
+                    MessageReceived(this, new StringEventArgs(Utils.ConvertWbxmlToXml(readStream)));
             }
         }
 
@@ -64,13 +62,13 @@ namespace VikingWalletPOS.Test
 
         public void Connect()
         {
-            synchronizedMessenger.Start();                
+            messenger.Start();                
             client.Connect();                  
         }
 
         public void Disconnect()
         {
-            synchronizedMessenger.Stop();                
+            messenger.Stop();                
             client.Disconnect();
         }
 
@@ -82,8 +80,8 @@ namespace VikingWalletPOS.Test
                 EComMessage outgoingMessage = EComMessage.CreateMessageFromElement(element);
                 outgoingMessage.WriteToStream(stream);
 
-                synchronizedMessenger.SendMessage(new ScsRawDataMessage(stream.ToArray()));
+                messenger.SendMessage(new ScsRawDataMessage(stream.ToArray()));
             }
         }
-    }
+    }    
 }
