@@ -12,6 +12,7 @@ using Comtech.Wbxml;
 using System.Xml;
 using System.Threading.Tasks;
 using VikingWalletPOS.Test.Model;
+using System.Net;
 
 namespace VikingWalletPOS.Test
 {
@@ -59,12 +60,14 @@ namespace VikingWalletPOS.Test
 
         #region API Responses
         /// <summary>
-        /// The list of coupons has been received
+        /// Build the XML that is to be sent in the response back to the client in WBXML format.
         /// </summary>
-        /// <param name="data">The result return by Viking Spots</param>
         /// <param name="client">The client that made the request</param>
-        /// <param name="message">The message containing the request</param>
-        void CouponListReceived(GetPOSCouponResult data, IScsServerClient client, ScsMessage message)
+        /// <param name="message">The request message</param>
+        /// <param name="code"><see cref="HttpStatusCode"/> returned from the Viking Spots API</param>
+        /// <param name="response">Result received from the Viking Spots API</param>
+        /// <param name="successStep">If the API request was OK, perform this callback</param>
+        void BuildAndSendResponse(IScsServerClient client, ScsMessage message, HttpStatusCode code, ResultObject response, Action<XmlWriter> successStep)
         {
             using (MemoryStream buffer = new MemoryStream())
             {
@@ -74,61 +77,42 @@ namespace VikingWalletPOS.Test
                 settings.OmitXmlDeclaration = true;
                 settings.Encoding = Encoding.GetEncoding("iso-8859-1");
 
-                /*
-                 * Example:
-                 * 
-                 * <rsp code="0" seq="" dsp="" prt="">
-                 *  <lst id="deals">
-                 *      <row>
-                 *          <fld id="dealId" val="" />
-                 *          <fld id="name" val="" />
-                 *          <fld id="user" val="" />
-                 *      </row>
-                 *  </lst>
-                 *</rsp>
-                 */
-
                 XmlWriter writer = XmlWriter.Create(buffer, settings);
-                writer.WriteStartElement("rsp");
-                writer.WriteAttributeString("code", "0");
+                writer.WriteStartElement("rsp");                
                 writer.WriteAttributeString("seq", "");
-                writer.WriteAttributeString("dsp", "Coupon list has been retrieved");
-                writer.WriteAttributeString("prt", "Please choose the correct one");
-                writer.WriteStartElement("lst");
+                writer.WriteAttributeString("code", ((int)code).ToString());
 
-                writer.WriteAttributeString("id", "deals");
-
-                foreach (POSCoupon coupon in data.response.coupons)
-                {
-                    writer.WriteStartElement("row");
-
-                    writer.WriteStartElement("fld");
-                    writer.WriteAttributeString("id", "dealId");
-                    writer.WriteAttributeString("val", coupon.id.ToString());
-                    writer.WriteEndElement(); // fld end element
-
-                    writer.WriteStartElement("fld");
-                    writer.WriteAttributeString("id", "name");
-                    writer.WriteAttributeString("val", coupon.name);
-                    writer.WriteEndElement(); // fld end element
-
-                    writer.WriteStartElement("fld");
-                    writer.WriteAttributeString("id", "user");
-                    writer.WriteAttributeString("val", coupon.user);
-                    writer.WriteEndElement(); // fld end element
-
-                    writer.WriteEndElement(); // row end element
+                if (code == HttpStatusCode.OK)
+                {        
+                    // All of the above and below code is always repeated. 
+                    // Except for this callback where the xmlwriter is expanded with custom element.
+                    // This code is only done when the API call was successful.
+                    // Error handling is done generically below
+                    successStep(writer);
                 }
-                writer.WriteEndElement(); // lst end element
+                else
+                {
+                    if (response != null)
+                    {
+                        string msg = response.messages.Length > 0 ? response.messages[0].msg_text : "Something went wrong!";
+                        writer.WriteAttributeString("dsp", msg);
+                    }
+                    else if (code == HttpStatusCode.NotFound)
+                    {
+                        writer.WriteAttributeString("dsp", "This endpoint does not exist!");
+                    }
+                    writer.WriteAttributeString("prt", "");
+                }
+
                 writer.WriteEndElement(); // rsp end element
                 writer.Close();
 
                 // Get the XML to convert to WBXML
                 buffer.Seek(0, SeekOrigin.Begin);
                 string outGoingXml = Encoding.GetEncoding("iso-8859-1").GetString(buffer.ToArray());
-                
+
                 // Convert to WBXML
-                RootElement element = Utils.ConvertXmlToWbxml(outGoingXml);                
+                RootElement element = Utils.ConvertXmlToWbxml(outGoingXml);
                 EComMessage outGoingMessage = EComMessage.CreateMessageFromElement(element);
 
                 // Write message to buffer
@@ -189,8 +173,7 @@ namespace VikingWalletPOS.Test
             Log(string.Format("A new client connected. Client Id = {0}", e.Client.ClientId));
 
             // Set up client message handling
-            e.Client.MessageReceived += new EventHandler<MessageEventArgs>(ClientMessageReceived);
-            e.Client.MessageSent += new EventHandler<MessageEventArgs>(ClientMessageSent);
+            e.Client.MessageReceived += new EventHandler<MessageEventArgs>(ClientMessageReceived);            
         }
         /// <summary>
         /// A message has been received from a client. 
@@ -219,34 +202,91 @@ namespace VikingWalletPOS.Test
                 
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml(inComingXml);
+                string id = doc.DocumentElement.GetAttribute("id");
 
-                if (doc.DocumentElement.GetAttribute("id") == "dealByPAN")
-                {                    
+                if (id == "dealByPAN")
+                {
                     // Call GetCoupon
                     int merchant_id = Convert.ToInt32(doc.DocumentElement.GetAttribute("mid"));
                     string card_pan = doc.DocumentElement.GetAttribute("pan");
                     string terminal_id = doc.DocumentElement.GetAttribute("tid");
 
                     GetPOSCouponRequest request = new GetPOSCouponRequest(merchant_id, card_pan, terminal_id);
-                    //Log(string.Format("Contacting Viking Spots API for GetCoupon"));
-                    api.GetCouponAsync(request, (response) =>
-                    {
-                        CouponListReceived(response, client, message);
-                    });
-                }                
-            }            
-        }
-        void ClientMessageSent(object sender, MessageEventArgs e)
-        {
-            //ScsRawDataMessage message = e.Message as ScsRawDataMessage;
-            //if (message == null)
-            //    return;
 
-            //Log(string.Format("Sent message {0} contents in reply to {1}:\r\n{2}",
-            //    message.MessageId,
-            //    message.RepliedMessageId,
-            //    BitConverter.ToString(message.MessageData)));            
-        }
+                    api.GetCouponAsync(request, (response, code) =>
+                    {
+                        BuildAndSendResponse(client, message, code, response, (writer) =>
+                        {
+                            /*
+                             * Example:
+                             * 
+                             * <rsp code="0" seq="" dsp="" prt="">
+                             *  <lst id="deals">
+                             *      <row>
+                             *          <fld id="dealId" val="" />
+                             *          <fld id="name" val="" />
+                             *          <fld id="user" val="" />
+                             *      </row>
+                             *  </lst>
+                             *</rsp>
+                             */
+
+                            writer.WriteAttributeString("dsp", "Coupon list has been retrieved");
+                            writer.WriteAttributeString("prt", "Please choose the correct one");
+                            writer.WriteStartElement("lst");
+
+                            writer.WriteAttributeString("id", "deals");
+
+                            foreach (POSCoupon coupon in response.response.coupons)
+                            {
+                                writer.WriteStartElement("row");
+
+                                writer.WriteStartElement("fld");
+                                writer.WriteAttributeString("id", "dealId");
+                                writer.WriteAttributeString("val", coupon.id.ToString());
+                                writer.WriteEndElement(); // fld end element
+
+                                writer.WriteStartElement("fld");
+                                writer.WriteAttributeString("id", "name");
+                                writer.WriteAttributeString("val", coupon.name);
+                                writer.WriteEndElement(); // fld end element
+
+                                writer.WriteStartElement("fld");
+                                writer.WriteAttributeString("id", "user");
+                                writer.WriteAttributeString("val", coupon.user);
+                                writer.WriteEndElement(); // fld end element
+
+                                writer.WriteEndElement(); // row end element
+                            }
+                            writer.WriteEndElement(); // lst end element                            
+                        });
+                    });
+                }
+                else if (id == "redeem")
+                {
+                    // Call Redeem
+                    int merchant_id = Convert.ToInt32(doc.DocumentElement.GetAttribute("mid"));
+                    int deal_id = Convert.ToInt32(doc.DocumentElement.GetAttribute("deal"));
+                    string terminal_id = doc.DocumentElement.GetAttribute("tid");
+
+                    POSRedeemRequest request = new POSRedeemRequest(merchant_id, deal_id, terminal_id);
+                    api.RedeemAsync(request, (response, code) =>
+                    {
+                        BuildAndSendResponse(client, message, code, response, (writer) =>
+                        {
+                            /*
+                             * Example:
+                             * 
+                             * <rsp code="0" seq="" dsp="" prt="" />
+                             */
+
+                            writer.WriteAttributeString("dsp", "Redeemed successfully!");
+                            writer.WriteAttributeString("prt", "Yay!");
+                        });
+                    });
+                }
+            }            
+        }        
         #endregion
     }
 }

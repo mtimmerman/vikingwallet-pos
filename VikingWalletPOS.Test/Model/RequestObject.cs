@@ -16,12 +16,7 @@ namespace VikingWalletPOS.Test.Model
             settings = new JsonSerializerSettings();
             settings.DefaultValueHandling = DefaultValueHandling.Ignore;
         }
-
-        public string ToJSON()
-        {
-            return JsonConvert.SerializeObject(this, Formatting.None, settings);
-        }
-
+        
         public string ToQueryString()
         {
             string result = "";            

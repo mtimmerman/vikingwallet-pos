@@ -68,6 +68,8 @@ namespace VikingWalletPOS.Test
             {
                 btnStartClient.Enabled = true;
                 btnStopClient.Enabled = false;
+                btnSendGetCoupons.Enabled = false;
+                btnSendRedeem.Enabled = false;
                 clientStarted = false;
             }
         }
@@ -82,6 +84,8 @@ namespace VikingWalletPOS.Test
             {
                 btnStartClient.Enabled = false;
                 btnStopClient.Enabled = true;
+                btnSendGetCoupons.Enabled = true;
+                btnSendRedeem.Enabled = true;
                 clientStarted = true;
             }
         }
@@ -144,11 +148,10 @@ namespace VikingWalletPOS.Test
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnSend_Click(object sender, EventArgs e)
+        private void btnSendGetCoupons_Click(object sender, EventArgs e)
         {
             using (MemoryStream buffer = new MemoryStream())
             {
-
                 XmlWriterSettings settings = new XmlWriterSettings();
                 settings.OmitXmlDeclaration = true;
                 settings.Encoding = UTF8Encoding.Default;
@@ -157,11 +160,11 @@ namespace VikingWalletPOS.Test
                 writer.WriteStartElement("req");
                 writer.WriteAttributeString("app", "??");
                 writer.WriteAttributeString("id", "dealByPAN");
-                writer.WriteAttributeString("ver", "1");
+                writer.WriteAttributeString("ver", "123");
                 writer.WriteAttributeString("dt", DateTime.Now.ToString("yyyyMMddHHmmtt"));
-                writer.WriteAttributeString("tid", txtGetCouponTerminalId.Text);
-                writer.WriteAttributeString("pan", txtGetCouponCardPAN.Text);
-                writer.WriteAttributeString("mid", txtGetCouponMerchantId.Text);
+                writer.WriteAttributeString("tid", txtGetCouponsTerminalId.Text);
+                writer.WriteAttributeString("pan", txtGetCouponsCardPAN.Text);
+                writer.WriteAttributeString("mid", txtGetCouponsMerchantId.Text);
                 writer.WriteEndElement();
                 writer.Close();
 
@@ -170,6 +173,33 @@ namespace VikingWalletPOS.Test
 
                 client.SendMessage(xml);
             }            
+        }
+
+        private void btnSendRedeem_Click(object sender, EventArgs e)
+        {
+            using (MemoryStream buffer = new MemoryStream())
+            {
+                XmlWriterSettings settings = new XmlWriterSettings();
+                settings.OmitXmlDeclaration = true;
+                settings.Encoding = Encoding.GetEncoding("iso-8859-1");
+
+                XmlWriter writer = XmlWriter.Create(buffer, settings);
+                writer.WriteStartElement("req");
+                writer.WriteAttributeString("app", "??");
+                writer.WriteAttributeString("id", "redeem");
+                writer.WriteAttributeString("ver", "123");
+                writer.WriteAttributeString("dt", DateTime.Now.ToString("yyyyMMddHHmmtt"));
+                writer.WriteAttributeString("tid", txtRedeemTerminalId.Text);
+                writer.WriteAttributeString("deal", txtRedeemDealId.Text);
+                writer.WriteAttributeString("mid", txtRedeemMerchantId.Text);
+                writer.WriteEndElement();
+                writer.Close();
+
+                buffer.Seek(0, SeekOrigin.Begin);
+                string xml = Encoding.GetEncoding("iso-8859-1").GetString(buffer.ToArray());
+
+                client.SendMessage(xml);
+            }  
         }        
     }
 }

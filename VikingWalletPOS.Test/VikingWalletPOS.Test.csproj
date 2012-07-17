@@ -83,6 +83,7 @@
     <Compile Include="Model\GetPOSCoupon.cs" />
     <Compile Include="Model\Message.cs" />
     <Compile Include="Model\Meta.cs" />
+    <Compile Include="Model\POSRedeemRequest.cs" />
     <Compile Include="Model\RequestObject.cs" />
     <Compile Include="Model\Response.cs" />
     <Compile Include="Model\ResultObject.cs" />

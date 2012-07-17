@@ -18,7 +18,8 @@ namespace VikingWalletPOS.Test
         private RequestReplyMessenger<IScsClient> messenger;
         public event EventHandler<StringEventArgs> MessageReceived;
         public event EventHandler Connected;
-        public event EventHandler Disconnected;        
+        public event EventHandler Disconnected;
+        private bool connected;
 
         public Client()
         {
@@ -46,6 +47,7 @@ namespace VikingWalletPOS.Test
 
         void ClientConnected(object sender, EventArgs e)
         {
+            connected = true;
             if (Connected != null)
             {
                 Connected(sender, e);
@@ -54,6 +56,7 @@ namespace VikingWalletPOS.Test
 
         void ClientDisconnected(object sender, EventArgs e)
         {
+            connected = false;
             if (Disconnected != null)
             {
                 Disconnected(sender, e);
@@ -74,13 +77,20 @@ namespace VikingWalletPOS.Test
 
         public void SendMessage(string xml)
         {
-            using (MemoryStream stream = new MemoryStream())
+            try
             {
-                RootElement element = Utils.ConvertXmlToWbxml(xml);
-                EComMessage outgoingMessage = EComMessage.CreateMessageFromElement(element);
-                outgoingMessage.WriteToStream(stream);
+                if (connected)
+                {
+                    using (MemoryStream stream = new MemoryStream())
+                    {
+                        RootElement element = Utils.ConvertXmlToWbxml(xml);
+                        EComMessage outgoingMessage = EComMessage.CreateMessageFromElement(element);
+                        outgoingMessage.WriteToStream(stream);
 
-                messenger.SendMessage(new ScsRawDataMessage(stream.ToArray()));
+                        messenger.SendMessage(new ScsRawDataMessage(stream.ToArray()));
+                    }
+                }
+            } catch {
             }
         }
     }    
