@@ -51,7 +51,7 @@ namespace VikingWalletPOS.Test
         }
         public void RedeemAsync(POSRedeemRequest req, Action<POSRedeemResult, HttpStatusCode> callback)
         {
-            RestRequest request = new RestRequest(string.Format("posredeem/"), Method.POST);
+            RestRequest request = new RestRequest(string.Format("posredeemcoupon/"), Method.POST);
             request.RequestFormat = DataFormat.Json;
             request.AddBody(req);
             apiClient.PostAsync(request, (response, handle) =>
