@@ -1,50 +1,50 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
+using System.IO;
 using System.Text;
 using System.Windows.Forms;
-using VikingWalletPOS;
-using Hik.Communication.Scs.Client;
-using Hik.Communication.Scs.Communication.EndPoints.Tcp;
-using Hik.Communication.Scs.Communication.Messengers;
-using Comtech.Wbxml;
 using System.Xml;
-using System.IO;
-using Comtech;
-using Hik.Communication.Scs.Communication.Messages;
 
-namespace VikingWalletPOS.Test
+namespace VikingWalletPOS
 {
+    /// <summary>
+    /// Front end form
+    /// </summary>
     public partial class frmMain : Form
     {
+        #region Private Members
         private Server server;
         private Client client;
-        private bool clientStarted;
-        private bool serverStarted;
+        #endregion
 
+        #region Constructor
         public frmMain()
         {
             InitializeComponent();
+
             server = new Server();
             client = new Client();
 
-            server.Logged += new EventHandler<StringEventArgs>(ServerMessageLogged);
+            server.Logged += new EventHandler<LogEventArgs>(ServerMessageLogged);
 
-            client.MessageReceived += new EventHandler<StringEventArgs>(MessageReceived);
+            client.MessageReceived += new EventHandler<ServerMessageEventArgs>(MessageReceived);
             client.Connected += new EventHandler(ClientConnected);
             client.Disconnected += new EventHandler(ClientDisconnected);            
         }
+        #endregion
 
-        void ServerMessageLogged(object sender, StringEventArgs e) 
+        #region Event Handlers
+        /// <summary>
+        /// A log message has been received from the server
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void ServerMessageLogged(object sender, LogEventArgs e) 
         {
             if (this.InvokeRequired)
             {
                 try
                 {
-                    this.Invoke(new EventHandler<StringEventArgs>(ServerMessageLogged), sender, e);
+                    this.Invoke(new EventHandler<LogEventArgs>(ServerMessageLogged), sender, e);
                 }
                 catch (ObjectDisposedException) { }
             }
@@ -53,7 +53,12 @@ namespace VikingWalletPOS.Test
                 txtResponse.AppendText(string.Format("\r\n{0}\r\n", e.Message));
             }
         }
-
+        /// <summary>
+        /// The client has disconnected from the server, either by choice or because the server went away
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        
         void ClientDisconnected(object sender, EventArgs e)
         {
             if (this.InvokeRequired)
@@ -69,11 +74,14 @@ namespace VikingWalletPOS.Test
                 btnStartClient.Enabled = true;
                 btnStopClient.Enabled = false;
                 btnSendGetCoupons.Enabled = false;
-                btnSendRedeem.Enabled = false;
-                clientStarted = false;
+                btnSendRedeem.Enabled = false;                
             }
         }
-
+        /// <summary>
+        /// The client has successfully connected to the server
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void ClientConnected(object sender, EventArgs e)
         {
             if (this.InvokeRequired)
@@ -85,62 +93,76 @@ namespace VikingWalletPOS.Test
                 btnStartClient.Enabled = false;
                 btnStopClient.Enabled = true;
                 btnSendGetCoupons.Enabled = true;
-                btnSendRedeem.Enabled = true;
-                clientStarted = true;
+                btnSendRedeem.Enabled = true;                
             }
         }
-
-        private void MessageReceived(object sender, StringEventArgs e)
+        /// <summary>
+        /// A message has been received from the server
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void MessageReceived(object sender, ServerMessageEventArgs e)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new EventHandler<StringEventArgs>(MessageReceived), sender, e);
+                this.Invoke(new EventHandler<ServerMessageEventArgs>(MessageReceived), sender, e);
             }
             else
             {
                 txtResponse.AppendText(string.Format("\r\nResponse from server:\r\n{0}\r\n", e.Message));                
             }
         }
-
+        /// <summary>
+        /// Start the server
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnStartServer_Click(object sender, EventArgs e)
         {
             server.Start();
-            serverStarted = true;
             btnStart.Enabled = false;
             btnStop.Enabled = true;
             btnStartClient.Enabled = true;
         }
-
+        /// <summary>
+        /// Form is closing. shut down stuff
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             client.Disconnect();
             server.Stop();            
         }
-
+        /// <summary>
+        /// Stop the server
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnStopServer_Click(object sender, EventArgs e)
         {
             server.Stop();
-            serverStarted = false;
             btnStart.Enabled = true;
             btnStop.Enabled = false;
         }
-
+        /// <summary>
+        /// Start the client
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnStartClient_Click(object sender, EventArgs e)
         {
-            if (!clientStarted && serverStarted)
-            {
-                client.Connect();                
-            }            
+            client.Connect();
         }
-
+        /// <summary>
+        /// Stop the client
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnStopClient_Click(object sender, EventArgs e)
         {
-            if (clientStarted)
-            {
-                client.Disconnect();                
-            }
+            client.Disconnect();
         }
-
         /// <summary>
         /// Send sample request. Normally our third party would do this request.
         /// 
@@ -150,56 +172,66 @@ namespace VikingWalletPOS.Test
         /// <param name="e"></param>
         private void btnSendGetCoupons_Click(object sender, EventArgs e)
         {
-            using (MemoryStream buffer = new MemoryStream())
+            SendMessage(writer =>
             {
-                XmlWriterSettings settings = new XmlWriterSettings();
-                settings.OmitXmlDeclaration = true;
-                settings.Encoding = UTF8Encoding.Default;
-
-                XmlWriter writer = XmlWriter.Create(buffer, settings);
-                writer.WriteStartElement("req");
-                writer.WriteAttributeString("app", "??");
                 writer.WriteAttributeString("id", "dealByPAN");
-                writer.WriteAttributeString("ver", "123");
-                writer.WriteAttributeString("dt", DateTime.Now.ToString("yyyyMMddHHmmtt"));
                 writer.WriteAttributeString("tid", txtGetCouponsTerminalId.Text);
                 writer.WriteAttributeString("pan", txtGetCouponsCardPAN.Text);
                 writer.WriteAttributeString("mid", txtGetCouponsMerchantId.Text);
-                writer.WriteEndElement();
-                writer.Close();
-
-                buffer.Seek(0, SeekOrigin.Begin);
-                string xml = Encoding.UTF8.GetString(buffer.ToArray());
-
-                client.SendMessage(xml);
-            }            
+            });                      
         }
-
+        /// <summary>
+        /// Send sample request. Normally our third party would do this request.
+        /// 
+        /// For testing purposes ONLY!
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnSendRedeem_Click(object sender, EventArgs e)
         {
-            using (MemoryStream buffer = new MemoryStream())
+            SendMessage(writer =>
             {
-                XmlWriterSettings settings = new XmlWriterSettings();
-                settings.OmitXmlDeclaration = true;
-                settings.Encoding = Encoding.GetEncoding("iso-8859-1");
-
-                XmlWriter writer = XmlWriter.Create(buffer, settings);
-                writer.WriteStartElement("req");
-                writer.WriteAttributeString("app", "??");
                 writer.WriteAttributeString("id", "redeem");
-                writer.WriteAttributeString("ver", "123");
-                writer.WriteAttributeString("dt", DateTime.Now.ToString("yyyyMMddHHmmtt"));
                 writer.WriteAttributeString("tid", txtRedeemTerminalId.Text);
                 writer.WriteAttributeString("deal", txtRedeemDealId.Text);
                 writer.WriteAttributeString("mid", txtRedeemMerchantId.Text);
+            });    
+        }
+        #endregion
+
+        #region Private Methods
+        /// <summary>
+        /// Generic function that will build the XML and send it to the server
+        /// </summary>
+        /// <param name="writeRequest">Action that expands the XML with the actual request parameters</param>
+        private void SendMessage(Action<XmlWriter> writeRequest)
+        {
+            using (MemoryStream buffer = new MemoryStream())
+            {
+                // Boring stuff like make the XML
+                XmlWriterSettings settings = new XmlWriterSettings();
+                settings.OmitXmlDeclaration = true;
+                settings.Encoding = Encoding.GetEncoding("iso-8859-1");
+                
+                XmlWriter writer = XmlWriter.Create(buffer, settings);
+                writer.WriteStartElement("req");
+                writer.WriteAttributeString("app", "9A");
+                writer.WriteAttributeString("ver", "123");
+                writer.WriteAttributeString("dt", DateTime.Now.ToString("yyyyMMddHHmmtt"));
+
+                // Do the custom stuff for the request
+                writeRequest(writer);
+
                 writer.WriteEndElement();
                 writer.Close();
 
                 buffer.Seek(0, SeekOrigin.Begin);
                 string xml = Encoding.GetEncoding("iso-8859-1").GetString(buffer.ToArray());
 
+                // Send the XML to the server
                 client.SendMessage(xml);
-            }  
-        }        
+            }
+        }
+        #endregion
     }
 }

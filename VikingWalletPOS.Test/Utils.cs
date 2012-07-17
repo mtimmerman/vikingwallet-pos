@@ -1,23 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 using System.Xml;
-using System.IO;
-using Comtech.Wbxml;
 using Comtech;
+using Comtech.Wbxml;
 
-namespace VikingWalletPOS.Test
+namespace VikingWalletPOS
 {
+    /// <summary>
+    /// Helper class with utilities
+    /// </summary>
     internal static class Utils
     {
+        /// <summary>
+        /// Convert WBXML to XML
+        /// </summary>
+        /// <param name="s">A stream containing WBXML</param>
+        /// <returns></returns>
         public static string ConvertWbxmlToXml(Stream s)
         {
             EComMessage incomingMessage = EComMessage.ReadFromStream(s);
             string xml = incomingMessage.RootElement.ToXmlString();
             return xml;
         }
-
+        /// <summary>
+        /// Convert XML to WBXML
+        /// </summary>
+        /// <param name="xml">xml to be converted</param>
+        /// <returns></returns>
         public static RootElement ConvertXmlToWbxml(string xml)
         {
             XmlDocument doc = new XmlDocument();

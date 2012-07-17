@@ -1,22 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Newtonsoft.Json;
-using System.Reflection;
+﻿using System.Reflection;
 
-namespace VikingWalletPOS.Test.Model
+namespace VikingWalletPOS.Model
 {
-    public class RequestObject
+    /// <summary>
+    /// Abstract class for Viking Spots API requests
+    /// </summary>
+    public abstract class RequestObject
     {
-        private JsonSerializerSettings settings;
-
-        public RequestObject()
-        {
-            settings = new JsonSerializerSettings();
-            settings.DefaultValueHandling = DefaultValueHandling.Ignore;
-        }
-        
+        /// <summary>
+        /// Convert the properties of this class to a querystring
+        /// </summary>
+        /// <returns>A querystring representation of the properties of this class</returns>
         public string ToQueryString()
         {
             string result = "";            

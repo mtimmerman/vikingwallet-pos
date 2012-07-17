@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C# Express 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wbxml", "Wbxml\Wbxml.csproj", "{B22296B1-FF93-4DEC-AAED-F2787D7E9165}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VikingWalletPOS.Test", "VikingWalletPOS.Test\VikingWalletPOS.Test.csproj", "{61864FBB-1234-42EF-AE81-1ADC6CB78DC7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VikingWalletPOS", "VikingWalletPOS.Test\VikingWalletPOS.csproj", "{61864FBB-1234-42EF-AE81-1ADC6CB78DC7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

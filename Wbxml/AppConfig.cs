@@ -9,6 +9,6 @@ namespace Comtech
 	{
 		// temp app config
 		public static readonly string AppID = "9A";
-		public static readonly Encoding TerminalEncoding = Encoding.GetEncoding("utf-8");
+		public static readonly Encoding TerminalEncoding = Encoding.GetEncoding("iso-8859-1");
 	}
 }

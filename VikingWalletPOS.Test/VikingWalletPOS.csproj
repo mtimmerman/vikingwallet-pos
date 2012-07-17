@@ -8,8 +8,8 @@
     <ProjectGuid>{61864FBB-1234-42EF-AE81-1ADC6CB78DC7}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>VikingWalletPOS.Test</RootNamespace>
-    <AssemblyName>VikingWalletPOS.Test</AssemblyName>
+    <RootNamespace>VikingWalletPOS</RootNamespace>
+    <AssemblyName>VikingWalletPOS</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -60,6 +60,7 @@
       <HintPath>..\Packages\Scs\Scs.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net" />
     <Reference Include="System.Xml.Linq" />
@@ -81,16 +82,13 @@
       <DependentUpon>frmMain.cs</DependentUpon>
     </Compile>
     <Compile Include="Model\GetPOSCoupon.cs" />
-    <Compile Include="Model\Message.cs" />
-    <Compile Include="Model\Meta.cs" />
     <Compile Include="Model\POSRedeemRequest.cs" />
     <Compile Include="Model\RequestObject.cs" />
-    <Compile Include="Model\Response.cs" />
     <Compile Include="Model\ResultObject.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Server.cs" />
-    <Compile Include="StringEventArgs.cs" />
+    <Compile Include="EventArgs.cs" />
     <Compile Include="Utils.cs" />
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
@@ -105,7 +103,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
