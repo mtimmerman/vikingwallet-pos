@@ -354,8 +354,9 @@ namespace VikingWalletPOS
             IFormatProvider culture = new CultureInfo("en-us");
             double amount = Convert.ToDouble(amountString, culture);
             string card_pan = doc.DocumentElement.GetAttribute("pan");
+            string payment_type = doc.DocumentElement.GetAttribute("pmt");
 
-            POSPaymentAcknowledgeRequest request = new POSPaymentAcknowledgeRequest(terminal_id, coupon_id, merchant_id, amount, card_pan);
+            POSPaymentAcknowledgeRequest request = new POSPaymentAcknowledgeRequest(terminal_id, coupon_id, merchant_id, amount, card_pan, payment_type);
 
             // Call posacknowledgepayment
             api.PaymentAcknowledgeAsync(request, (response, code) =>
@@ -368,7 +369,7 @@ namespace VikingWalletPOS
                      * <rsp code="0" seq="" dsp="" prt="" />
                      */
 
-                    writer.WriteAttributeString("dsp", "Acknowledged payment successfully!");
+                    writer.WriteAttributeString("dsp", "Successfully acknowledged payment!");
                     writer.WriteAttributeString("prt", "Yay!");
                 });
             });

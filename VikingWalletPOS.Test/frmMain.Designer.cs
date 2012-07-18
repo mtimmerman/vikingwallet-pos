@@ -70,7 +70,6 @@
             this.btnSendPaymentAcknowledge = new System.Windows.Forms.Button();
             this.pnlTop = new System.Windows.Forms.Panel();
             this.txtResponse = new System.Windows.Forms.TextBox();
-            this.btnAddCheckinTest = new System.Windows.Forms.Button();
             this.gbxServer.SuspendLayout();
             this.gbxClient.SuspendLayout();
             this.tpGetCoupons.SuspendLayout();
@@ -494,7 +493,6 @@
             // 
             // pnlTop
             // 
-            this.pnlTop.Controls.Add(this.btnAddCheckinTest);
             this.pnlTop.Controls.Add(this.gbxServer);
             this.pnlTop.Controls.Add(this.gbxClient);
             this.pnlTop.Controls.Add(this.tcEndpoints);
@@ -514,16 +512,6 @@
             this.txtResponse.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtResponse.Size = new System.Drawing.Size(750, 196);
             this.txtResponse.TabIndex = 10;
-            // 
-            // btnAddCheckinTest
-            // 
-            this.btnAddCheckinTest.Location = new System.Drawing.Point(9, 224);
-            this.btnAddCheckinTest.Name = "btnAddCheckinTest";
-            this.btnAddCheckinTest.Size = new System.Drawing.Size(75, 23);
-            this.btnAddCheckinTest.TabIndex = 8;
-            this.btnAddCheckinTest.Text = "Test";
-            this.btnAddCheckinTest.UseVisualStyleBackColor = true;
-            this.btnAddCheckinTest.Click += new System.EventHandler(this.btnAddCheckinTest_Click);
             // 
             // frmMain
             // 
@@ -598,7 +586,6 @@
         private System.Windows.Forms.Button btnSendPaymentAcknowledge;
         private System.Windows.Forms.TextBox txtPaymentAcknowledgeDealId;
         private System.Windows.Forms.Label lblPaymentAcknowledgeDealId;
-        private System.Windows.Forms.Button btnAddCheckinTest;
     }
 }
 
