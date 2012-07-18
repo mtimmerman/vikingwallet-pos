@@ -3,6 +3,8 @@ using System.IO;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
+using System.Net;
+using Newtonsoft.Json;
 
 namespace VikingWalletPOS
 {
@@ -255,5 +257,38 @@ namespace VikingWalletPOS
             }
         }
         #endregion        
+
+        private void btnAddCheckinTest_Click(object sender, EventArgs e)
+        {
+            var args = new
+            {
+                spot_id = 7                
+            };
+            string json = JsonConvert.SerializeObject(args);
+            byte[] buffer_data = Encoding.UTF8.GetBytes(json);
+            
+            HttpWebRequest request = HttpWebRequest.Create("https://vikingspots.com/api-public/v3/checkins/add/?bearer_token=2471f7980e2b8406a32c91ee7d1f71d033df68a1") as HttpWebRequest;
+
+            request.ContentType = "application/json";
+            request.Method = "POST";
+            request.ContentLength = buffer_data.Length;
+            Stream stream = request.GetRequestStream();
+            stream.Write(buffer_data, 0, buffer_data.Length);
+            stream.Close();
+
+            try
+            {
+                WebResponse response = request.GetResponse();
+            }
+            catch (WebException ex)
+            {
+                using (MemoryStream responseStream = ex.Response.GetResponseStream() as MemoryStream){
+                    byte[] data = new byte[responseStream.Length];
+                    responseStream.Read(data, 0, data.Length);
+                    string responseText = Encoding.UTF8.GetString(data);
+                    object responseObject = JsonConvert.DeserializeObject(responseText);
+                }                
+            }
+        }
     }
 }

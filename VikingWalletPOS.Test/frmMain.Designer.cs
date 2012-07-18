@@ -53,23 +53,24 @@
             this.txtRedeemDealId = new System.Windows.Forms.TextBox();
             this.lblRedeemTerminalId = new System.Windows.Forms.Label();
             this.txtRedeemTerminalId = new System.Windows.Forms.TextBox();
-            this.pnlTop = new System.Windows.Forms.Panel();
-            this.txtResponse = new System.Windows.Forms.TextBox();
             this.tpPaymentAcknowledge = new System.Windows.Forms.TabPage();
             this.gbPaymentAcknowledge = new System.Windows.Forms.GroupBox();
-            this.btnSendPaymentAcknowledge = new System.Windows.Forms.Button();
+            this.txtPaymentAcknowledgeDealId = new System.Windows.Forms.TextBox();
+            this.lblPaymentAcknowledgeDealId = new System.Windows.Forms.Label();
+            this.txtPaymentAcknowledgePaymentType = new System.Windows.Forms.TextBox();
+            this.lblPaymentAcknowledgePaymentType = new System.Windows.Forms.Label();
+            this.txtPaymentAcknowledgeAmount = new System.Windows.Forms.TextBox();
+            this.lblPaymentAcknowledgeAmount = new System.Windows.Forms.Label();
             this.txtPaymentAcknowledgeMerchantId = new System.Windows.Forms.TextBox();
             this.lblPaymentAcknowledgeMerchantId = new System.Windows.Forms.Label();
             this.txtPaymentAcknowledgeCardPAN = new System.Windows.Forms.TextBox();
             this.lblPaymentAcknowledgeCardPAN = new System.Windows.Forms.Label();
             this.lblPaymentAcknowledgeTerminalId = new System.Windows.Forms.Label();
             this.txtPaymentAcknowledgeTerminalId = new System.Windows.Forms.TextBox();
-            this.txtPaymentAcknowledgeAmount = new System.Windows.Forms.TextBox();
-            this.lblPaymentAcknowledgeAmount = new System.Windows.Forms.Label();
-            this.txtPaymentAcknowledgePaymentType = new System.Windows.Forms.TextBox();
-            this.lblPaymentAcknowledgePaymentType = new System.Windows.Forms.Label();
-            this.lblPaymentAcknowledgeDealId = new System.Windows.Forms.Label();
-            this.txtPaymentAcknowledgeDealId = new System.Windows.Forms.TextBox();
+            this.btnSendPaymentAcknowledge = new System.Windows.Forms.Button();
+            this.pnlTop = new System.Windows.Forms.Panel();
+            this.txtResponse = new System.Windows.Forms.TextBox();
+            this.btnAddCheckinTest = new System.Windows.Forms.Button();
             this.gbxServer.SuspendLayout();
             this.gbxClient.SuspendLayout();
             this.tpGetCoupons.SuspendLayout();
@@ -77,9 +78,9 @@
             this.tcEndpoints.SuspendLayout();
             this.tpRedeem.SuspendLayout();
             this.gbRedeem.SuspendLayout();
-            this.pnlTop.SuspendLayout();
             this.tpPaymentAcknowledge.SuspendLayout();
             this.gbPaymentAcknowledge.SuspendLayout();
+            this.pnlTop.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnStart
@@ -165,7 +166,7 @@
             this.tpGetCoupons.Location = new System.Drawing.Point(4, 25);
             this.tpGetCoupons.Name = "tpGetCoupons";
             this.tpGetCoupons.Padding = new System.Windows.Forms.Padding(3);
-            this.tpGetCoupons.Size = new System.Drawing.Size(575, 324);
+            this.tpGetCoupons.Size = new System.Drawing.Size(643, 324);
             this.tpGetCoupons.TabIndex = 0;
             this.tpGetCoupons.Text = "Get Coupons";
             this.tpGetCoupons.UseVisualStyleBackColor = true;
@@ -182,7 +183,7 @@
             this.gbGetCoupons.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gbGetCoupons.Location = new System.Drawing.Point(3, 3);
             this.gbGetCoupons.Name = "gbGetCoupons";
-            this.gbGetCoupons.Size = new System.Drawing.Size(569, 318);
+            this.gbGetCoupons.Size = new System.Drawing.Size(637, 318);
             this.gbGetCoupons.TabIndex = 0;
             this.gbGetCoupons.TabStop = false;
             this.gbGetCoupons.Text = "Parameters";
@@ -258,7 +259,7 @@
             this.tpRedeem.Location = new System.Drawing.Point(4, 25);
             this.tpRedeem.Name = "tpRedeem";
             this.tpRedeem.Padding = new System.Windows.Forms.Padding(3);
-            this.tpRedeem.Size = new System.Drawing.Size(575, 324);
+            this.tpRedeem.Size = new System.Drawing.Size(643, 324);
             this.tpRedeem.TabIndex = 1;
             this.tpRedeem.Text = "Redeem";
             this.tpRedeem.UseVisualStyleBackColor = true;
@@ -275,7 +276,7 @@
             this.gbRedeem.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gbRedeem.Location = new System.Drawing.Point(3, 3);
             this.gbRedeem.Name = "gbRedeem";
-            this.gbRedeem.Size = new System.Drawing.Size(569, 318);
+            this.gbRedeem.Size = new System.Drawing.Size(637, 318);
             this.gbRedeem.TabIndex = 0;
             this.gbRedeem.TabStop = false;
             this.gbRedeem.Text = "Parameters";
@@ -343,28 +344,6 @@
             this.txtRedeemTerminalId.TabIndex = 2;
             this.txtRedeemTerminalId.Text = "12345";
             // 
-            // pnlTop
-            // 
-            this.pnlTop.Controls.Add(this.gbxServer);
-            this.pnlTop.Controls.Add(this.gbxClient);
-            this.pnlTop.Controls.Add(this.tcEndpoints);
-            this.pnlTop.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlTop.Location = new System.Drawing.Point(0, 0);
-            this.pnlTop.Name = "pnlTop";
-            this.pnlTop.Size = new System.Drawing.Size(750, 353);
-            this.pnlTop.TabIndex = 9;
-            // 
-            // txtResponse
-            // 
-            this.txtResponse.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtResponse.Location = new System.Drawing.Point(0, 353);
-            this.txtResponse.Multiline = true;
-            this.txtResponse.Name = "txtResponse";
-            this.txtResponse.ReadOnly = true;
-            this.txtResponse.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtResponse.Size = new System.Drawing.Size(750, 196);
-            this.txtResponse.TabIndex = 10;
-            // 
             // tpPaymentAcknowledge
             // 
             this.tpPaymentAcknowledge.Controls.Add(this.gbPaymentAcknowledge);
@@ -399,17 +378,56 @@
             this.gbPaymentAcknowledge.TabStop = false;
             this.gbPaymentAcknowledge.Text = "Parameters";
             // 
-            // btnSendPaymentAcknowledge
+            // txtPaymentAcknowledgeDealId
             // 
-            this.btnSendPaymentAcknowledge.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnSendPaymentAcknowledge.Enabled = false;
-            this.btnSendPaymentAcknowledge.Location = new System.Drawing.Point(6, 289);
-            this.btnSendPaymentAcknowledge.Name = "btnSendPaymentAcknowledge";
-            this.btnSendPaymentAcknowledge.Size = new System.Drawing.Size(75, 23);
-            this.btnSendPaymentAcknowledge.TabIndex = 10;
-            this.btnSendPaymentAcknowledge.Text = "Send";
-            this.btnSendPaymentAcknowledge.UseVisualStyleBackColor = true;
-            this.btnSendPaymentAcknowledge.Click += new System.EventHandler(this.btnSendPaymentAcknowledge_Click);
+            this.txtPaymentAcknowledgeDealId.Location = new System.Drawing.Point(6, 258);
+            this.txtPaymentAcknowledgeDealId.Name = "txtPaymentAcknowledgeDealId";
+            this.txtPaymentAcknowledgeDealId.Size = new System.Drawing.Size(188, 22);
+            this.txtPaymentAcknowledgeDealId.TabIndex = 22;
+            this.txtPaymentAcknowledgeDealId.Text = "270";
+            // 
+            // lblPaymentAcknowledgeDealId
+            // 
+            this.lblPaymentAcknowledgeDealId.AutoSize = true;
+            this.lblPaymentAcknowledgeDealId.Location = new System.Drawing.Point(6, 238);
+            this.lblPaymentAcknowledgeDealId.Name = "lblPaymentAcknowledgeDealId";
+            this.lblPaymentAcknowledgeDealId.Size = new System.Drawing.Size(52, 17);
+            this.lblPaymentAcknowledgeDealId.TabIndex = 21;
+            this.lblPaymentAcknowledgeDealId.Text = "Deal Id";
+            // 
+            // txtPaymentAcknowledgePaymentType
+            // 
+            this.txtPaymentAcknowledgePaymentType.Location = new System.Drawing.Point(6, 213);
+            this.txtPaymentAcknowledgePaymentType.Name = "txtPaymentAcknowledgePaymentType";
+            this.txtPaymentAcknowledgePaymentType.Size = new System.Drawing.Size(188, 22);
+            this.txtPaymentAcknowledgePaymentType.TabIndex = 20;
+            this.txtPaymentAcknowledgePaymentType.Text = "card";
+            // 
+            // lblPaymentAcknowledgePaymentType
+            // 
+            this.lblPaymentAcknowledgePaymentType.AutoSize = true;
+            this.lblPaymentAcknowledgePaymentType.Location = new System.Drawing.Point(6, 194);
+            this.lblPaymentAcknowledgePaymentType.Name = "lblPaymentAcknowledgePaymentType";
+            this.lblPaymentAcknowledgePaymentType.Size = new System.Drawing.Size(179, 17);
+            this.lblPaymentAcknowledgePaymentType.TabIndex = 19;
+            this.lblPaymentAcknowledgePaymentType.Text = "Payment Type (card, cash)";
+            // 
+            // txtPaymentAcknowledgeAmount
+            // 
+            this.txtPaymentAcknowledgeAmount.Location = new System.Drawing.Point(6, 169);
+            this.txtPaymentAcknowledgeAmount.Name = "txtPaymentAcknowledgeAmount";
+            this.txtPaymentAcknowledgeAmount.Size = new System.Drawing.Size(188, 22);
+            this.txtPaymentAcknowledgeAmount.TabIndex = 18;
+            this.txtPaymentAcknowledgeAmount.Text = "10.00";
+            // 
+            // lblPaymentAcknowledgeAmount
+            // 
+            this.lblPaymentAcknowledgeAmount.AutoSize = true;
+            this.lblPaymentAcknowledgeAmount.Location = new System.Drawing.Point(6, 150);
+            this.lblPaymentAcknowledgeAmount.Name = "lblPaymentAcknowledgeAmount";
+            this.lblPaymentAcknowledgeAmount.Size = new System.Drawing.Size(56, 17);
+            this.lblPaymentAcknowledgeAmount.TabIndex = 17;
+            this.lblPaymentAcknowledgeAmount.Text = "Amount";
             // 
             // txtPaymentAcknowledgeMerchantId
             // 
@@ -462,56 +480,50 @@
             this.txtPaymentAcknowledgeTerminalId.TabIndex = 11;
             this.txtPaymentAcknowledgeTerminalId.Text = "12345";
             // 
-            // txtPaymentAcknowledgeAmount
+            // btnSendPaymentAcknowledge
             // 
-            this.txtPaymentAcknowledgeAmount.Location = new System.Drawing.Point(6, 169);
-            this.txtPaymentAcknowledgeAmount.Name = "txtPaymentAcknowledgeAmount";
-            this.txtPaymentAcknowledgeAmount.Size = new System.Drawing.Size(188, 22);
-            this.txtPaymentAcknowledgeAmount.TabIndex = 18;
-            this.txtPaymentAcknowledgeAmount.Text = "10.00";
+            this.btnSendPaymentAcknowledge.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnSendPaymentAcknowledge.Enabled = false;
+            this.btnSendPaymentAcknowledge.Location = new System.Drawing.Point(6, 289);
+            this.btnSendPaymentAcknowledge.Name = "btnSendPaymentAcknowledge";
+            this.btnSendPaymentAcknowledge.Size = new System.Drawing.Size(75, 23);
+            this.btnSendPaymentAcknowledge.TabIndex = 10;
+            this.btnSendPaymentAcknowledge.Text = "Send";
+            this.btnSendPaymentAcknowledge.UseVisualStyleBackColor = true;
+            this.btnSendPaymentAcknowledge.Click += new System.EventHandler(this.btnSendPaymentAcknowledge_Click);
             // 
-            // lblPaymentAcknowledgeAmount
+            // pnlTop
             // 
-            this.lblPaymentAcknowledgeAmount.AutoSize = true;
-            this.lblPaymentAcknowledgeAmount.Location = new System.Drawing.Point(6, 150);
-            this.lblPaymentAcknowledgeAmount.Name = "lblPaymentAcknowledgeAmount";
-            this.lblPaymentAcknowledgeAmount.Size = new System.Drawing.Size(56, 17);
-            this.lblPaymentAcknowledgeAmount.TabIndex = 17;
-            this.lblPaymentAcknowledgeAmount.Text = "Amount";
+            this.pnlTop.Controls.Add(this.btnAddCheckinTest);
+            this.pnlTop.Controls.Add(this.gbxServer);
+            this.pnlTop.Controls.Add(this.gbxClient);
+            this.pnlTop.Controls.Add(this.tcEndpoints);
+            this.pnlTop.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlTop.Location = new System.Drawing.Point(0, 0);
+            this.pnlTop.Name = "pnlTop";
+            this.pnlTop.Size = new System.Drawing.Size(750, 353);
+            this.pnlTop.TabIndex = 9;
             // 
-            // txtPaymentAcknowledgePaymentType
+            // txtResponse
             // 
-            this.txtPaymentAcknowledgePaymentType.Location = new System.Drawing.Point(6, 213);
-            this.txtPaymentAcknowledgePaymentType.Name = "txtPaymentAcknowledgePaymentType";
-            this.txtPaymentAcknowledgePaymentType.Size = new System.Drawing.Size(188, 22);
-            this.txtPaymentAcknowledgePaymentType.TabIndex = 20;
-            this.txtPaymentAcknowledgePaymentType.Text = "card";
+            this.txtResponse.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtResponse.Location = new System.Drawing.Point(0, 353);
+            this.txtResponse.Multiline = true;
+            this.txtResponse.Name = "txtResponse";
+            this.txtResponse.ReadOnly = true;
+            this.txtResponse.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtResponse.Size = new System.Drawing.Size(750, 196);
+            this.txtResponse.TabIndex = 10;
             // 
-            // lblPaymentAcknowledgePaymentType
+            // btnAddCheckinTest
             // 
-            this.lblPaymentAcknowledgePaymentType.AutoSize = true;
-            this.lblPaymentAcknowledgePaymentType.Location = new System.Drawing.Point(6, 194);
-            this.lblPaymentAcknowledgePaymentType.Name = "lblPaymentAcknowledgePaymentType";
-            this.lblPaymentAcknowledgePaymentType.Size = new System.Drawing.Size(179, 17);
-            this.lblPaymentAcknowledgePaymentType.TabIndex = 19;
-            this.lblPaymentAcknowledgePaymentType.Text = "Payment Type (card, cash)";
-            // 
-            // lblPaymentAcknowledgeDealId
-            // 
-            this.lblPaymentAcknowledgeDealId.AutoSize = true;
-            this.lblPaymentAcknowledgeDealId.Location = new System.Drawing.Point(6, 238);
-            this.lblPaymentAcknowledgeDealId.Name = "lblPaymentAcknowledgeDealId";
-            this.lblPaymentAcknowledgeDealId.Size = new System.Drawing.Size(52, 17);
-            this.lblPaymentAcknowledgeDealId.TabIndex = 21;
-            this.lblPaymentAcknowledgeDealId.Text = "Deal Id";
-            // 
-            // txtPaymentAcknowledgeDealId
-            // 
-            this.txtPaymentAcknowledgeDealId.Location = new System.Drawing.Point(6, 258);
-            this.txtPaymentAcknowledgeDealId.Name = "txtPaymentAcknowledgeDealId";
-            this.txtPaymentAcknowledgeDealId.Size = new System.Drawing.Size(188, 22);
-            this.txtPaymentAcknowledgeDealId.TabIndex = 22;
-            this.txtPaymentAcknowledgeDealId.Text = "270";
+            this.btnAddCheckinTest.Location = new System.Drawing.Point(9, 224);
+            this.btnAddCheckinTest.Name = "btnAddCheckinTest";
+            this.btnAddCheckinTest.Size = new System.Drawing.Size(75, 23);
+            this.btnAddCheckinTest.TabIndex = 8;
+            this.btnAddCheckinTest.Text = "Test";
+            this.btnAddCheckinTest.UseVisualStyleBackColor = true;
+            this.btnAddCheckinTest.Click += new System.EventHandler(this.btnAddCheckinTest_Click);
             // 
             // frmMain
             // 
@@ -533,10 +545,10 @@
             this.tpRedeem.ResumeLayout(false);
             this.gbRedeem.ResumeLayout(false);
             this.gbRedeem.PerformLayout();
-            this.pnlTop.ResumeLayout(false);
             this.tpPaymentAcknowledge.ResumeLayout(false);
             this.gbPaymentAcknowledge.ResumeLayout(false);
             this.gbPaymentAcknowledge.PerformLayout();
+            this.pnlTop.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -586,6 +598,7 @@
         private System.Windows.Forms.Button btnSendPaymentAcknowledge;
         private System.Windows.Forms.TextBox txtPaymentAcknowledgeDealId;
         private System.Windows.Forms.Label lblPaymentAcknowledgeDealId;
+        private System.Windows.Forms.Button btnAddCheckinTest;
     }
 }
 
