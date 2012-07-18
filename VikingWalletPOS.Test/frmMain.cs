@@ -74,7 +74,8 @@ namespace VikingWalletPOS
                 btnStartClient.Enabled = true;
                 btnStopClient.Enabled = false;
                 btnSendGetCoupons.Enabled = false;
-                btnSendRedeem.Enabled = false;                
+                btnSendRedeem.Enabled = false;
+                btnSendPaymentAcknowledge.Enabled = false;
             }
         }
         /// <summary>
@@ -93,7 +94,8 @@ namespace VikingWalletPOS
                 btnStartClient.Enabled = false;
                 btnStopClient.Enabled = true;
                 btnSendGetCoupons.Enabled = true;
-                btnSendRedeem.Enabled = true;                
+                btnSendRedeem.Enabled = true;
+                btnSendPaymentAcknowledge.Enabled = true;
             }
         }
         /// <summary>
@@ -197,6 +199,26 @@ namespace VikingWalletPOS
                 writer.WriteAttributeString("mid", txtRedeemMerchantId.Text);
             });    
         }
+        /// <summary>
+        /// Send sample request. Normally our third party would do this request.
+        /// 
+        /// For testing purposes ONLY!
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnSendPaymentAcknowledge_Click(object sender, EventArgs e)
+        {
+            SendMessage(writer =>
+            {                
+                writer.WriteAttributeString("id", "acknowledge");
+                writer.WriteAttributeString("tid", txtPaymentAcknowledgeTerminalId.Text);
+                writer.WriteAttributeString("deal", txtPaymentAcknowledgeDealId.Text);
+                writer.WriteAttributeString("mid", txtPaymentAcknowledgeMerchantId.Text);
+                writer.WriteAttributeString("amt", txtPaymentAcknowledgeAmount.Text.Replace(".", ""));
+                writer.WriteAttributeString("pmt", txtPaymentAcknowledgePaymentType.Text);
+                writer.WriteAttributeString("pan", txtPaymentAcknowledgeCardPAN.Text);
+            });
+        }
         #endregion
 
         #region Private Methods
@@ -232,6 +254,6 @@ namespace VikingWalletPOS
                 client.SendMessage(xml);
             }
         }
-        #endregion
+        #endregion        
     }
 }

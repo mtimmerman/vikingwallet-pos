@@ -10,6 +10,7 @@ using Hik.Communication.Scs.Communication.EndPoints.Tcp;
 using Hik.Communication.Scs.Communication.Messages;
 using Hik.Communication.Scs.Server;
 using VikingWalletPOS.Model;
+using System.Globalization;
 
 namespace VikingWalletPOS
 {
@@ -209,106 +210,169 @@ namespace VikingWalletPOS
             using (MemoryStream readStream = new MemoryStream(message.MessageData))
             {
                 // Decode WBXML to XML
-                EComMessage incomingMessage = EComMessage.ReadFromStream(readStream);                
+                EComMessage incomingMessage = EComMessage.ReadFromStream(readStream);
                 string inComingXml = incomingMessage.RootElement.ToXmlString();
 
                 Log(string.Format("Request from client {0} with id {1}:\r\n{2}",
                     client.ClientId,
                     message.MessageId,
                     inComingXml));
-                
+
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml(inComingXml);
                 string id = doc.DocumentElement.GetAttribute("id");
 
                 if (id == "dealByPAN")
                 {
-                    // Extract parameters from request
-                    int merchant_id = Convert.ToInt32(doc.DocumentElement.GetAttribute("mid"));
-                    string card_pan = doc.DocumentElement.GetAttribute("pan");
-                    string terminal_id = doc.DocumentElement.GetAttribute("tid");
-
-                    GetPOSCouponRequest request = new GetPOSCouponRequest(merchant_id, card_pan, terminal_id);
-
-                    // Call poscoupon
-                    api.GetCouponAsync(request, (response, code) =>
-                    {
-                        BuildAndSendResponse(client, message, code, response, (writer) =>
-                        {
-                            /*
-                             * Expand the response with custom stuff for this kind of request
-                             * 
-                             * Example:
-                             * 
-                             * <rsp code="0" seq="" dsp="" prt="">
-                             *  <lst id="deals">
-                             *      <row>
-                             *          <fld id="dealId" val="" />
-                             *          <fld id="name" val="" />
-                             *          <fld id="user" val="" />
-                             *      </row>
-                             *  </lst>
-                             *</rsp>
-                             */
-
-                            writer.WriteAttributeString("dsp", "Coupon list has been retrieved");
-                            writer.WriteAttributeString("prt", "Please choose the correct one");
-                            writer.WriteStartElement("lst");
-
-                            writer.WriteAttributeString("id", "deals");
-
-                            foreach (POSCoupon coupon in response.response.coupons)
-                            {
-                                writer.WriteStartElement("row");
-
-                                writer.WriteStartElement("fld");
-                                writer.WriteAttributeString("id", "dealId");
-                                writer.WriteAttributeString("val", coupon.id.ToString());
-                                writer.WriteEndElement(); // fld end element
-
-                                writer.WriteStartElement("fld");
-                                writer.WriteAttributeString("id", "name");
-                                writer.WriteAttributeString("val", coupon.name);
-                                writer.WriteEndElement(); // fld end element
-
-                                writer.WriteStartElement("fld");
-                                writer.WriteAttributeString("id", "user");
-                                writer.WriteAttributeString("val", coupon.user);
-                                writer.WriteEndElement(); // fld end element
-
-                                writer.WriteEndElement(); // row end element
-                            }
-                            writer.WriteEndElement(); // lst end element                            
-                        });
-                    });
+                    DealByPAN(doc, client, message);
                 }
                 else if (id == "redeem")
-                {           
-                    // Extract parameters from request
-                    int merchant_id = Convert.ToInt32(doc.DocumentElement.GetAttribute("mid"));
-                    int deal_id = Convert.ToInt32(doc.DocumentElement.GetAttribute("deal"));
-                    string terminal_id = doc.DocumentElement.GetAttribute("tid");
-
-                    POSRedeemRequest request = new POSRedeemRequest(merchant_id, deal_id, terminal_id);
-
-                    // Call posredeemcoupon
-                    api.RedeemAsync(request, (response, code) =>
-                    {
-                        BuildAndSendResponse(client, message, code, response, (writer) =>
-                        {
-                            /*
-                             * Example:
-                             * 
-                             * <rsp code="0" seq="" dsp="" prt="" />
-                             */
-
-                            writer.WriteAttributeString("dsp", "Redeemed successfully!");
-                            writer.WriteAttributeString("prt", "Yay!");
-                        });
-                    });
+                {
+                    Redeem(doc, client, message);
                 }
-            }            
-        }        
+                else if (id == "acknowledge")
+                {
+                    AcknowledgePayment(doc, client, message);
+                }
+            }
+        }
+        #endregion
+
+        #region Private Methods
+        /// <summary>
+        /// Do API request GetCoupon and send response back to the client
+        /// </summary>
+        /// <param name="doc">request XML</param>
+        /// <param name="client">client that send the request</param>
+        /// <param name="message">The message containing the request</param>
+        private void DealByPAN(XmlDocument doc, IScsServerClient client, ScsMessage message)
+        {
+            // Extract parameters from request
+            int merchant_id = Convert.ToInt32(doc.DocumentElement.GetAttribute("mid"));
+            string card_pan = doc.DocumentElement.GetAttribute("pan");
+            string terminal_id = doc.DocumentElement.GetAttribute("tid");
+
+            GetPOSCouponRequest request = new GetPOSCouponRequest(merchant_id, card_pan, terminal_id);
+
+            // Call poscoupon
+            api.GetCouponAsync(request, (response, code) =>
+            {
+                BuildAndSendResponse(client, message, code, response, (writer) =>
+                {
+                    /*
+                     * Expand the response with custom stuff for this kind of request
+                     * 
+                     * Example:
+                     * 
+                     * <rsp code="0" seq="" dsp="" prt="">
+                     *  <lst id="deals">
+                     *      <row>
+                     *          <fld id="dealId" val="" />
+                     *          <fld id="name" val="" />
+                     *          <fld id="user" val="" />
+                     *      </row>
+                     *  </lst>
+                     *</rsp>
+                     */
+
+                    writer.WriteAttributeString("dsp", "Coupon list has been retrieved");
+                    writer.WriteAttributeString("prt", "Please choose the correct one");
+                    writer.WriteStartElement("lst");
+
+                    writer.WriteAttributeString("id", "deals");
+
+                    foreach (POSCoupon coupon in response.response.coupons)
+                    {
+                        writer.WriteStartElement("row");
+
+                        writer.WriteStartElement("fld");
+                        writer.WriteAttributeString("id", "dealId");
+                        writer.WriteAttributeString("val", coupon.id.ToString());
+                        writer.WriteEndElement(); // fld end element
+
+                        writer.WriteStartElement("fld");
+                        writer.WriteAttributeString("id", "name");
+                        writer.WriteAttributeString("val", coupon.name);
+                        writer.WriteEndElement(); // fld end element
+
+                        writer.WriteStartElement("fld");
+                        writer.WriteAttributeString("id", "user");
+                        writer.WriteAttributeString("val", coupon.user);
+                        writer.WriteEndElement(); // fld end element
+
+                        writer.WriteEndElement(); // row end element
+                    }
+                    writer.WriteEndElement(); // lst end element                            
+                });
+            });
+        }
+        /// <summary>
+        /// Do API request Redeem and send response back to the client
+        /// </summary>
+        /// <param name="doc">request XML</param>
+        /// <param name="client">client that send the request</param>
+        /// <param name="message">The message containing the request</param>
+        private void Redeem(XmlDocument doc, IScsServerClient client, ScsMessage message)
+        {
+            // Extract parameters from request
+            int merchant_id = Convert.ToInt32(doc.DocumentElement.GetAttribute("mid"));
+            int coupon_id = Convert.ToInt32(doc.DocumentElement.GetAttribute("deal"));
+            string terminal_id = doc.DocumentElement.GetAttribute("tid");
+
+            POSRedeemRequest request = new POSRedeemRequest(merchant_id, coupon_id, terminal_id);
+
+            // Call posredeemcoupon
+            api.RedeemAsync(request, (response, code) =>
+            {
+                BuildAndSendResponse(client, message, code, response, (writer) =>
+                {
+                    /*
+                     * Example:
+                     * 
+                     * <rsp code="0" seq="" dsp="" prt="" />
+                     */
+
+                    writer.WriteAttributeString("dsp", "Redeemed successfully!");
+                    writer.WriteAttributeString("prt", "Yay!");
+                });
+            });
+        }
+        /// <summary>
+        /// Do API request AcknowledgePayment and send response back to the client
+        /// </summary>
+        /// <param name="doc">request XML</param>
+        /// <param name="client">client that send the request</param>
+        /// <param name="message">The message containing the request</param>
+        private void AcknowledgePayment(XmlDocument doc, IScsServerClient client, ScsMessage message)
+        {
+            // Extract parameters from request
+            int merchant_id = Convert.ToInt32(doc.DocumentElement.GetAttribute("mid"));
+            int coupon_id = Convert.ToInt32(doc.DocumentElement.GetAttribute("deal"));
+            string terminal_id = doc.DocumentElement.GetAttribute("tid");
+            string amountString = doc.DocumentElement.GetAttribute("amt");
+            amountString = amountString.Insert(amountString.Length - 2, ".");
+            IFormatProvider culture = new CultureInfo("en-us");
+            double amount = Convert.ToDouble(amountString, culture);
+            string card_pan = doc.DocumentElement.GetAttribute("pan");
+
+            POSPaymentAcknowledgeRequest request = new POSPaymentAcknowledgeRequest(terminal_id, coupon_id, merchant_id, amount, card_pan);
+
+            // Call posacknowledgepayment
+            api.PaymentAcknowledgeAsync(request, (response, code) =>
+            {
+                BuildAndSendResponse(client, message, code, response, (writer) =>
+                {
+                    /*
+                     * Example:
+                     * 
+                     * <rsp code="0" seq="" dsp="" prt="" />
+                     */
+
+                    writer.WriteAttributeString("dsp", "Acknowledged payment successfully!");
+                    writer.WriteAttributeString("prt", "Yay!");
+                });
+            });
+        }
         #endregion
     }
 }
