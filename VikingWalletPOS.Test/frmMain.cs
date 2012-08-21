@@ -6,7 +6,7 @@ using System.Xml;
 using System.Net;
 using Newtonsoft.Json;
 
-namespace VikingWalletPOS
+namespace VikingWalletPOS.Test
 {
     /// <summary>
     /// Front end form

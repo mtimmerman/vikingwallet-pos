@@ -1,4 +1,4 @@
-﻿namespace VikingWalletPOS
+﻿namespace VikingWalletPOS.Test
 {
     partial class frmMain
     {

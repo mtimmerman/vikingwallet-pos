@@ -3,7 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C# Express 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wbxml", "Wbxml\Wbxml.csproj", "{B22296B1-FF93-4DEC-AAED-F2787D7E9165}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VikingWalletPOS", "VikingWalletPOS.Test\VikingWalletPOS.csproj", "{61864FBB-1234-42EF-AE81-1ADC6CB78DC7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VikingWalletPOS.Test", "VikingWalletPOS.Test\VikingWalletPOS.Test.csproj", "{61864FBB-1234-42EF-AE81-1ADC6CB78DC7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VikingWalletPOS.Service", "VikingWalletPOS.Service\VikingWalletPOS.Service.csproj", "{F1D1F189-1B1A-4BE0-8211-E0E522921B7B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B22296B1-FF93-4DEC-AAED-F2787D7E9165} = {B22296B1-FF93-4DEC-AAED-F2787D7E9165}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VikingWalletPOS", "VikingWalletPOS\VikingWalletPOS.csproj", "{6A665BD8-67B9-4684-9277-FF2E14E47E5C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +42,26 @@ Global
 		{61864FBB-1234-42EF-AE81-1ADC6CB78DC7}.Release|Mixed Platforms.Build.0 = Release|x86
 		{61864FBB-1234-42EF-AE81-1ADC6CB78DC7}.Release|x86.ActiveCfg = Release|x86
 		{61864FBB-1234-42EF-AE81-1ADC6CB78DC7}.Release|x86.Build.0 = Release|x86
+		{F1D1F189-1B1A-4BE0-8211-E0E522921B7B}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{F1D1F189-1B1A-4BE0-8211-E0E522921B7B}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{F1D1F189-1B1A-4BE0-8211-E0E522921B7B}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{F1D1F189-1B1A-4BE0-8211-E0E522921B7B}.Debug|x86.ActiveCfg = Debug|x86
+		{F1D1F189-1B1A-4BE0-8211-E0E522921B7B}.Debug|x86.Build.0 = Debug|x86
+		{F1D1F189-1B1A-4BE0-8211-E0E522921B7B}.Release|Any CPU.ActiveCfg = Release|x86
+		{F1D1F189-1B1A-4BE0-8211-E0E522921B7B}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{F1D1F189-1B1A-4BE0-8211-E0E522921B7B}.Release|Mixed Platforms.Build.0 = Release|x86
+		{F1D1F189-1B1A-4BE0-8211-E0E522921B7B}.Release|x86.ActiveCfg = Release|x86
+		{F1D1F189-1B1A-4BE0-8211-E0E522921B7B}.Release|x86.Build.0 = Release|x86
+		{6A665BD8-67B9-4684-9277-FF2E14E47E5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A665BD8-67B9-4684-9277-FF2E14E47E5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A665BD8-67B9-4684-9277-FF2E14E47E5C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{6A665BD8-67B9-4684-9277-FF2E14E47E5C}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{6A665BD8-67B9-4684-9277-FF2E14E47E5C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6A665BD8-67B9-4684-9277-FF2E14E47E5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A665BD8-67B9-4684-9277-FF2E14E47E5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A665BD8-67B9-4684-9277-FF2E14E47E5C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{6A665BD8-67B9-4684-9277-FF2E14E47E5C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{6A665BD8-67B9-4684-9277-FF2E14E47E5C}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
