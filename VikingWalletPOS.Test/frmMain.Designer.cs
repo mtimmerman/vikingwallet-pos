@@ -105,7 +105,6 @@
             // 
             // btnStartClient
             // 
-            this.btnStartClient.Enabled = false;
             this.btnStartClient.Location = new System.Drawing.Point(6, 21);
             this.btnStartClient.Name = "btnStartClient";
             this.btnStartClient.Size = new System.Drawing.Size(75, 23);
