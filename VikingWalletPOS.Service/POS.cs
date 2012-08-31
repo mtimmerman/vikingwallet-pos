@@ -56,6 +56,12 @@ namespace VikingWalletPOS.Service
             CanHandleSessionChangeEvent = true;
             ServiceName = "POS";
             server = new Server();
+            server.Logged += new EventHandler<LogEventArgs>(server_Logged);
+        }
+
+        void server_Logged(object sender, LogEventArgs e)
+        {
+            EventLog.WriteEntry(e.Message, EventLogEntryType.Information);
         }
 
         static void Main()

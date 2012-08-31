@@ -25,7 +25,7 @@ namespace VikingWalletPOS
             apiClient = new RestClient(ConfigurationManager.AppSettings["apiBaseUrl"]);
             apiClient.Authenticator = new HttpBasicAuthenticator(
                 ConfigurationManager.AppSettings["apiUsername"], 
-                ConfigurationManager.AppSettings["apiPassword"]);
+                ConfigurationManager.AppSettings["apiPassword"]);            
         }
         #endregion
 

@@ -209,30 +209,43 @@ namespace VikingWalletPOS
 
             using (MemoryStream readStream = new MemoryStream(message.MessageData))
             {
-                // Decode WBXML to XML
-                EComMessage incomingMessage = EComMessage.ReadFromStream(readStream);
-                string inComingXml = incomingMessage.RootElement.ToXmlString();
-
-                Log(string.Format("Request from client {0} with id {1}:\r\n{2}",
+                string rawData = Encoding.UTF8.GetString(readStream.ToArray());
+                Log(string.Format("Request from client {0} with id {1} RAW:\r\n{2}",
                     client.ClientId,
                     message.MessageId,
-                    inComingXml));
+                    rawData));
 
-                XmlDocument doc = new XmlDocument();
-                doc.LoadXml(inComingXml);
-                string id = doc.DocumentElement.GetAttribute("id");
+                try
+                {
+                    // Decode WBXML to XML
+                    EComMessage incomingMessage = EComMessage.ReadFromStream(readStream);
+                    string inComingXml = incomingMessage.RootElement.ToXmlString();
 
-                if (id == "dealByPAN")
-                {
-                    DealByPAN(doc, client, message);
+                    Log(string.Format("Request from client {0} with id {1} TRANSLATED:\r\n{2}",
+                        client.ClientId,
+                        message.MessageId,
+                        inComingXml));
+
+                    XmlDocument doc = new XmlDocument();
+                    doc.LoadXml(inComingXml);
+                    string id = doc.DocumentElement.GetAttribute("id");
+
+                    if (id == "dealByPAN")
+                    {
+                        DealByPAN(doc, client, message);
+                    }
+                    else if (id == "redeem")
+                    {
+                        Redeem(doc, client, message);
+                    }
+                    else if (id == "acknowledge")
+                    {
+                        AcknowledgePayment(doc, client, message);
+                    }
                 }
-                else if (id == "redeem")
+                catch (Exception ex)
                 {
-                    Redeem(doc, client, message);
-                }
-                else if (id == "acknowledge")
-                {
-                    AcknowledgePayment(doc, client, message);
+                    Log(string.Format("Exception encountered:\r\n{0}", ex));
                 }
             }
         }

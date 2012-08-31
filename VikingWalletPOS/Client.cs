@@ -7,6 +7,7 @@ using Hik.Communication.Scs.Client;
 using Hik.Communication.Scs.Communication.EndPoints.Tcp;
 using Hik.Communication.Scs.Communication.Messages;
 using Hik.Communication.Scs.Communication.Messengers;
+using System.Text;
 
 namespace VikingWalletPOS
 {
@@ -136,6 +137,7 @@ namespace VikingWalletPOS
                 EComMessage outgoingMessage = EComMessage.CreateMessageFromElement(element);
                 outgoingMessage.WriteToStream(stream);
 
+                
                 // Sent the WBXML to the server
                 messenger.SendMessage(new ScsRawDataMessage(stream.ToArray()));
             }

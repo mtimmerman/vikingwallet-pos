@@ -94,7 +94,6 @@
             // 
             // btnStop
             // 
-            this.btnStop.Enabled = false;
             this.btnStop.Location = new System.Drawing.Point(6, 50);
             this.btnStop.Name = "btnStop";
             this.btnStop.Size = new System.Drawing.Size(75, 23);
@@ -323,7 +322,7 @@
             this.txtRedeemDealId.Name = "txtRedeemDealId";
             this.txtRedeemDealId.Size = new System.Drawing.Size(188, 22);
             this.txtRedeemDealId.TabIndex = 4;
-            this.txtRedeemDealId.Text = "270";
+            this.txtRedeemDealId.Text = "79";
             // 
             // lblRedeemTerminalId
             // 
@@ -382,7 +381,7 @@
             this.txtPaymentAcknowledgeDealId.Name = "txtPaymentAcknowledgeDealId";
             this.txtPaymentAcknowledgeDealId.Size = new System.Drawing.Size(188, 22);
             this.txtPaymentAcknowledgeDealId.TabIndex = 22;
-            this.txtPaymentAcknowledgeDealId.Text = "270";
+            this.txtPaymentAcknowledgeDealId.Text = "79";
             // 
             // lblPaymentAcknowledgeDealId
             // 
