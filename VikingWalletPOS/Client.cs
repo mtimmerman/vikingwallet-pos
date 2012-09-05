@@ -3,11 +3,8 @@ using System.Configuration;
 using System.IO;
 using Comtech;
 using Comtech.Wbxml;
-using Hik.Communication.Scs.Client;
-using Hik.Communication.Scs.Communication.EndPoints.Tcp;
-using Hik.Communication.Scs.Communication.Messages;
-using Hik.Communication.Scs.Communication.Messengers;
 using System.Text;
+using System.Net.Sockets;
 
 namespace VikingWalletPOS
 {
@@ -20,9 +17,7 @@ namespace VikingWalletPOS
     {
         #region Private Members
         // TCP client that connects to our POS server
-        private IScsClient client;
-        // Messenger that handles the communication between client and server
-        private RequestReplyMessenger<IScsClient> messenger;        
+        private TcpClient client;
         #endregion
 
         #region Events
@@ -40,45 +35,7 @@ namespace VikingWalletPOS
         public event EventHandler Disconnected;
         #endregion
 
-        #region Constructor
-        /// <summary>
-        /// Create a new instance of <see cref="Client"/>
-        /// </summary>
-        public Client()
-        {
-            // Set up the client
-            client = ScsClientFactory.CreateClient(new ScsTcpEndPoint(ConfigurationManager.AppSettings["tcpServer"],
-                                                                      Convert.ToInt32(ConfigurationManager.AppSettings["tcpPort"])));
-            client.MessageReceived += new EventHandler<MessageEventArgs>(ServerMessageReceived);
-            client.Connected += new EventHandler(ClientConnected);
-            client.Disconnected += new EventHandler(ClientDisconnected);
-
-            // Set up the messenger
-            messenger = new RequestReplyMessenger<IScsClient>(client);
-        }
-        #endregion
-
-        #region Event Handlers
-        /// <summary>
-        /// A WBXML message has been received from the server.
-        /// This method will translate the message to XML and fire the MessageReceived event
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void ServerMessageReceived(object sender, MessageEventArgs e)
-        {
-            ScsRawDataMessage message = e.Message as ScsRawDataMessage;
-
-            // Only accept Raw data and only when proper events are hooked
-            if (message == null || MessageReceived == null)
-                return;
-
-            using (MemoryStream readStream = new MemoryStream(message.MessageData))
-            {
-                // Fire event
-                MessageReceived(this, new ServerMessageEventArgs(Utils.ConvertWbxmlToXml(readStream)));
-            }
-        }
+        #region Event Handlers        
         /// <summary>
         /// The client has successfully connected to the server
         /// </summary>
@@ -113,16 +70,36 @@ namespace VikingWalletPOS
         /// </summary>
         public void Connect()
         {
-            messenger.Start();                
-            client.Connect();                  
+            try
+            {
+                client = new TcpClient();
+                client.Connect(ConfigurationManager.AppSettings["tcpServer"],
+                    Convert.ToInt32(ConfigurationManager.AppSettings["tcpPort"]));
+
+                if (Connected != null)
+                {
+                    Connected(this, EventArgs.Empty);
+                }
+            }
+            catch (SocketException)
+            {                
+            }
         }
         /// <summary>
         /// Disconnect from the server
         /// </summary>
         public void Disconnect()
         {
-            messenger.Stop();                
-            client.Disconnect();
+            if (client != null && client.Connected)
+            {
+                client.Close();
+
+                if (Disconnected != null)
+                {
+                    // Fire event
+                    Disconnected(this, EventArgs.Empty);
+                }
+            }
         }
         /// <summary>
         /// Send a message to the server
@@ -130,17 +107,29 @@ namespace VikingWalletPOS
         /// <param name="xml">The XML that will be translated to WBXML before being sent to the server</param>
         public void SendMessage(string xml)
         {
-            using (MemoryStream stream = new MemoryStream())
-            {
-                // Convert the XML to WBXML
-                RootElement element = Utils.ConvertXmlToWbxml(xml);
-                EComMessage outgoingMessage = EComMessage.CreateMessageFromElement(element);
-                outgoingMessage.WriteToStream(stream);
+            // Convert the XML to WBXML
+            RootElement element = Utils.ConvertXmlToWbxml(xml);
+            EComMessage outgoingMessage = EComMessage.CreateMessageFromElement(element);
+            NetworkStream stream = client.GetStream();
+            outgoingMessage.WriteToStream(stream);
 
-                
-                // Sent the WBXML to the server
-                messenger.SendMessage(new ScsRawDataMessage(stream.ToArray()));
-            }
+            int readCount = 0;
+            byte[] data = new byte[client.ReceiveBufferSize];
+            using (MemoryStream responseStream = new MemoryStream())
+            {
+                readCount = stream.Read(data, 0, client.ReceiveBufferSize);
+
+                do
+                {
+                    if (readCount > 0)
+                    {
+                        responseStream.Write(data, 0, readCount);
+                    }
+                } while (readCount == client.ReceiveBufferSize && (readCount = stream.Read(data, 0, client.ReceiveBufferSize)) != 0);
+
+                responseStream.Seek(0, SeekOrigin.Begin);
+                MessageReceived(this, new ServerMessageEventArgs(Utils.ConvertWbxmlToXml(responseStream)));
+            }                                       
         }
         #endregion
     }    

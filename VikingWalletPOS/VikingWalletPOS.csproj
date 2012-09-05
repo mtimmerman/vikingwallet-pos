@@ -20,7 +20,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>0</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -28,7 +28,7 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>0</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
@@ -37,9 +37,6 @@
     </Reference>
     <Reference Include="RestSharp">
       <HintPath>..\Packages\RestSharp.103.0.0\RestSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="Scs">
-      <HintPath>..\Packages\Scs\Scs.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -52,6 +49,9 @@
   <ItemGroup>
     <Compile Include="API.cs" />
     <Compile Include="Client.cs" />
+    <Compile Include="ClientConnectionPool.cs" />
+    <Compile Include="ClientHandler.cs" />
+    <Compile Include="ClientService.cs" />
     <Compile Include="EventArgs.cs" />
     <Compile Include="Model\GetPOSCoupon.cs" />
     <Compile Include="Model\POSPaymentAcknowledge.cs" />
@@ -59,7 +59,6 @@
     <Compile Include="Model\RequestObject.cs" />
     <Compile Include="Model\ResultObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Server.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>

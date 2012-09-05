@@ -15,8 +15,9 @@ namespace VikingWalletPOS.Test
     public partial class frmMain : Form
     {
         #region Private Members
-        private Server server;
+        private ClientService server;
         private Client client;
+        private ClientConnectionPool connectionPool = new ClientConnectionPool();          
         #endregion
 
         #region Constructor
@@ -24,15 +25,16 @@ namespace VikingWalletPOS.Test
         {
             InitializeComponent();
 
-            server = new Server();
-            client = new Client();
+            server = new ClientService(connectionPool);
 
             server.Logged += new EventHandler<LogEventArgs>(ServerMessageLogged);
+            client = new Client();
 
             client.MessageReceived += new EventHandler<ServerMessageEventArgs>(MessageReceived);
             client.Connected += new EventHandler(ClientConnected);
             client.Disconnected += new EventHandler(ClientDisconnected);            
         }
+
         #endregion
 
         #region Event Handlers

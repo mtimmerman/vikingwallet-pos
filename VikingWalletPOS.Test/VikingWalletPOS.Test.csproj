@@ -56,9 +56,6 @@
     <Reference Include="RestSharp">
       <HintPath>..\Packages\RestSharp.103.0.0\RestSharp.dll</HintPath>
     </Reference>
-    <Reference Include="Scs">
-      <HintPath>..\Packages\Scs\Scs.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />

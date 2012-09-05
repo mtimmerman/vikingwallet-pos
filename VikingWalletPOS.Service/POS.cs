@@ -39,7 +39,8 @@ namespace VikingWalletPOS.Service
     {
         private static int userCount = 0;
         private static ManualResetEvent pause = new ManualResetEvent(false);
-        private Server server;
+        private ClientConnectionPool connectionPool = new ClientConnectionPool();
+        private ClientService server;
 
         [DllImport("ADVAPI32.DLL", EntryPoint = "SetServiceStatus")]
         public static extern bool SetServiceStatus(
@@ -55,8 +56,7 @@ namespace VikingWalletPOS.Service
             CanPauseAndContinue = true;
             CanHandleSessionChangeEvent = true;
             ServiceName = "POS";
-            server = new Server();
-            server.Logged += new EventHandler<LogEventArgs>(server_Logged);
+            server = new ClientService(connectionPool);
         }
 
         void server_Logged(object sender, LogEventArgs e)
