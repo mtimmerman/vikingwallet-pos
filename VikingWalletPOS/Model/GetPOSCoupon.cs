@@ -18,7 +18,7 @@
         /// <summary>
         /// The terminal id of the spot
         /// </summary>
-        public string terminal_id { get; set; }
+        public int terminal_id { get; set; }
         #endregion
 
         #region Constructor
@@ -28,7 +28,7 @@
         /// <param name="merchant_id">Id of the merchant</param>
         /// <param name="card_pan">The card PAN of the user</param>
         /// <param name="terminal_id">The terminal id of the spot</param>
-        public GetPOSCouponRequest(int merchant_id, string card_pan, string terminal_id)
+        public GetPOSCouponRequest(int merchant_id, string card_pan, int terminal_id)
             : base()
         {
             this.merchant_id = merchant_id;

@@ -234,7 +234,7 @@
             this.txtGetCouponsTerminalId.Name = "txtGetCouponsTerminalId";
             this.txtGetCouponsTerminalId.Size = new System.Drawing.Size(188, 22);
             this.txtGetCouponsTerminalId.TabIndex = 0;
-            this.txtGetCouponsTerminalId.Text = "12345";
+            this.txtGetCouponsTerminalId.Text = "00012345";
             // 
             // tcEndpoints
             // 

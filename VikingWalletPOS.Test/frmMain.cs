@@ -4,7 +4,6 @@ using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 using System.Net;
-using Newtonsoft.Json;
 using System.Diagnostics;
 
 namespace VikingWalletPOS.Test
